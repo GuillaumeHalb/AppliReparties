@@ -4,21 +4,36 @@ import com.ensimag.api.bank.NotEnoughMoneyException;
 
 public class Account implements IAccount {
 
+	private User user;
+	private int number;
+	private int balance;
+	
+	public Account(User user, int number, int balance) {
+		this.user = user;
+		this.number = number;
+		this.balance = balance;
+	}
+	
+	public Account(User user)
+	{
+		this.user = user;
+		//TODO number
+		this.balance = 0;
+	}
+	
 	@Override
 	public IUser getAccountUser() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.user;
 	}
 
 	@Override
 	public long getAccountNumber() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.number;
 	}
 
 	@Override
 	public int add(int amount) {
-		// TODO Auto-generated method stub
+		this.balance += amount;
 		return 0;
 	}
 
