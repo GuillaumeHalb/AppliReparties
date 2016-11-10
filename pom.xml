@@ -6,14 +6,15 @@
 	<artifactId>bank-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
     
-
+<dependencies>
     <dependency>
         <groupId>com.ensimag</groupId>
         <artifactId>bank-api</artifactId>
         <scope>system</scope>
         <version>0.0.1-SNAPSHOT</version>
-        <systemPath>${basedir}\bank-api-0.0.1-SNAPSHOT.jar</systemPath>
+        <systemPath>${basedir}/bank-api-0.0.1-SNAPSHOT.jar</systemPath>
     </dependency>
+</dependencies>
 	<build>
 		<plugins>
 			<plugin>
