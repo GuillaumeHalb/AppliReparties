@@ -7,11 +7,13 @@ public class Account implements IAccount {
 	private User user;
 	private int number;
 	private int balance;
+	private int overdraw;
 	
 	public Account(User user, int number, int balance) {
 		this.user = user;
 		this.number = number;
 		this.balance = balance;
+		this.overdraw = 0;
 	}
 	
 	public Account(User user)
@@ -39,19 +41,25 @@ public class Account implements IAccount {
 
 	@Override
 	public int remove(int amount) throws NotEnoughMoneyException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (this.balance + this.overdraw >= amount)
+		{
+			this.balance -= amount;
+			return 0;
+		}
+		else
+		{
+			throw new NotEnoughMoneyException(this);
+		}
 	}
 
 	@Override
 	public int getTotal() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.balance + this.overdraw;
 	}
 
 	@Override
 	public int setAllowedOverdraw(int overdraw) {
-		// TODO Auto-generated method stub
+		this.overdraw = overdraw;
 		return 0;
 	}
 
