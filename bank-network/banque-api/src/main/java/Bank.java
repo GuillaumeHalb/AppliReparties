@@ -60,7 +60,7 @@ public class Bank implements IBank {
 				throw new AccountNotFoundException("Account not in this bank");
 			}
 		}
-		return false;
+		throw new AccountNotFoundException();
 	}
 
 	@Override
