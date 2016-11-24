@@ -2,8 +2,10 @@
 public class Main {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		BankNode noeud_1 = new BankNode();
+		BankNode noeud_2 = new BankNode();
+		
+		
 	}
 
 }
