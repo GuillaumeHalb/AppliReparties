@@ -13,60 +13,53 @@ import com.ensimag.api.message.IAck;
 import com.ensimag.api.message.IResult;
 import com.ensimag.api.node.INode;
 
-public class BankNode implements IBankNode {
-// TODO: mettre ça ailleurs
-	public static int nodeNumber = 0;
-
-	
-	private List<IAccount> accountList;
+public class BankNode implements IBankNode {		
+	private Bank bank;
 	private int id;
+	private List<INode> neighboors;
 	
-	public BankNode() {
-		accountList = new LinkedList<>();
-		id = BankNode.nodeNumber;
-		BankNode.nodeNumber++;
+	public BankNode(Bank bank, int id) {
+		this.bank = bank;
+		this.id = id;
+		this.neighboors = new LinkedList<>();
 	}
 	
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
-		return accountList;
+		return this.bank.getAccounts();
 	}
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
-		for (IAccount account : accountList) {
-			if (account.getAccountNumber() == number) {
-				return account;
-			}
-		}
-		return null;
+		return this.bank.getAccout(number);
 	}
 
 	@Override
-	public IAccount openAccount(IUser user) throws RemoteException {
-		IAccount account = new Account(user);
-		return account;
+	public IAccount openAccount(IUser user) throws RemoteException {		
+		return this.bank.openAccount(user);
 	}
 
 	@Override
 	public boolean closeAccount(long number) throws AccountNotFoundException, RemoteException {
-		IAccount accountToClose = getAccount(number);
-		if (this.accountList.remove(accountToClose)) {
-			return true;
-		} else {
-			if (!this.accountList.contains(accountToClose)) {
-				throw new AccountNotFoundException("Account not in this bank");
-			}
-		}
-		return false;
+		return this.bank.closeAccount(number);
 	}
 
 	@Override
 	public long getId() throws RemoteException {
-		// Numero du proccessus ?		
-		return this.nodeNumber;
+		return this.id;
 	}
 
+	@Override
+	public void addNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
+		this.neighboors.add(neighboor);
+	}
+	
+	@Override
+	public void removeNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
+		this.neighboors.remove(neighboor);
+	}
+	
+// Implement message before implemented those methods
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
 		// Check if the message is for this bank
@@ -76,15 +69,9 @@ public class BankNode implements IBankNode {
 			// Transfer the message to the neighboor
 		}*/
 	}
-
+	
 	@Override
 	public void onAck(IAck ack) throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removeNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
 		// TODO Auto-generated method stub
 
 	}
@@ -100,11 +87,4 @@ public class BankNode implements IBankNode {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public void addNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
 }
