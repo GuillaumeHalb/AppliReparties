@@ -30,3 +30,12 @@ main : new banknode a enregistrer auprès du rmi.
        	   aller le chercher.
 
 RMI lancé sur un programme à part.
+
+Soutenance :
+10 minutes.
+On fournit le client.
+Montrer que la demande du client circule bien sur le réseau.
+Quelques slides pour montrer ce qu'on a fait, mais ne pas y passer 3h.
+Pas de rendu du code, mais le code sera examiné.
+Si possible, compiler en dehors d'eclipse.
+Le code sera peut-être pris après la soutenance pour y jetter un oeil.
