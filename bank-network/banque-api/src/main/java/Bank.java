@@ -13,7 +13,6 @@ public class Bank implements IBank {
 	private List<IAccount> accountList;
 
 	
-	
 	public Bank(int bankID) {
 		super();
 		this.bankID = bankID;
@@ -26,7 +25,6 @@ public class Bank implements IBank {
 		this.bankID = bankID;
 		this.accountList = accountList;
 	}
-
 
 
 	@Override

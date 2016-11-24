@@ -2,8 +2,11 @@
 public class Main {
 
 	public static void main(String[] args) {
-		BankNode noeud_1 = new BankNode();
-		BankNode noeud_2 = new BankNode();
+		int bankID = 0;
+		int bankNodeID = 0;
+		Bank bank1 = new Bank(bankID);
+		BankNode noeud_1 = new BankNode(bank1, bankNodeID);
+		
 		
 		
 	}
