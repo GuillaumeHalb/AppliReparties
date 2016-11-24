@@ -15,7 +15,7 @@ import com.ensimag.api.node.INode;
 
 public class BankNode implements IBankNode {		
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -2414181384542180339L;
 	
 	private Bank bank;
 	private int id;

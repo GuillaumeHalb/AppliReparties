@@ -4,7 +4,7 @@ import com.ensimag.api.message.EnumMessageType;
 
 public class Message implements IBankMessage {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2481989767948951546L;
 	
 	private IBankAction action;
 	private long messageId;

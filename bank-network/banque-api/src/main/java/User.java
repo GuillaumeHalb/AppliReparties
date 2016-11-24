@@ -1,6 +1,8 @@
 import com.ensimag.api.bank.IUser;
 
 public class User implements IUser {
+
+	private static final long serialVersionUID = 3355610152396539315L;
 	
 	private String name;
 	private String firstName;

@@ -12,7 +12,6 @@ public class Bank implements IBank {
 	private int bankID;
 	private List<IAccount> accountList;
 
-	
 	public Bank(int bankID) {
 		super();
 		this.bankID = bankID;
@@ -65,8 +64,7 @@ public class Bank implements IBank {
 
 	@Override
 	public long getBankId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.bankID;
 	}
 
 }

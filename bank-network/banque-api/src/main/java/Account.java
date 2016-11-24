@@ -4,6 +4,8 @@ import com.ensimag.api.bank.NotEnoughMoneyException;
 
 public class Account implements IAccount {
 
+	private static final long serialVersionUID = 1412244524309258892L;
+	
 	private IUser user;
 	private int number;
 	private int balance;

@@ -2,8 +2,8 @@ import com.ensimag.api.message.IAck;
 
 public class Ack implements IAck {
 
-	private static final long serialVersionUID = 1L;
-
+	private static final long serialVersionUID = -6056893412666221878L;
+	
 	public long ackSenderId;
 	public long ackMessageId;
 	
