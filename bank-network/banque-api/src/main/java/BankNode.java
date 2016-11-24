@@ -64,6 +64,11 @@ public class BankNode implements IBankNode {
 	
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
+		// Send ack to the sender
+		message.getSenderId();
+		// IBankNode ackDestination = neighboors.
+		// Ack ack = new Ack(this.getId(), message.getMessageId());
+		
 		if (message.getDestinationBankId() == this.bank.getBankId()) {
 			try {
 				message.getAction().execute(this);
