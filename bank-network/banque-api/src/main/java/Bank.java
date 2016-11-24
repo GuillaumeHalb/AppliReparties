@@ -43,13 +43,20 @@ public class Bank implements IBank {
 
 	@Override
 	public IAccount openAccount(IUser user) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		IAccount account = new Account(user);
+		return account;
 	}
 
 	@Override
 	public boolean closeAccount(long number) throws AccountNotFoundException, RemoteException {
-		// TODO Auto-generated method stub
+		IAccount accountToClose = getAccount(number);
+		if (this.accountList.remove(accountToClose)) {
+			return true;
+		} else {
+			if (!this.accountList.contains(accountToClose)) {
+				throw new AccountNotFoundException("Account not in this bank");
+			}
+		}
 		return false;
 	}
 
