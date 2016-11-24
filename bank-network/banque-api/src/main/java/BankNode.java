@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -14,22 +15,31 @@ import com.ensimag.api.node.INode;
 
 public class BankNode implements IBankNode {
 
+	private List<IAccount> accountList;
+	
+	public BankNode() {
+		accountList = new LinkedList<>();
+	}
+	
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		return accountList;
 	}
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
-		// TODO Auto-generated method stub
+		for (IAccount account : accountList) {
+			if (account.getAccountNumber() == number) {
+				return account;
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public IAccount openAccount(IUser user) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		IAccount account = new Account(user);
+		return account;
 	}
 
 	@Override

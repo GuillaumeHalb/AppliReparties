@@ -4,7 +4,7 @@ import com.ensimag.api.bank.NotEnoughMoneyException;
 
 public class Account implements IAccount {
 
-	private User user;
+	private IUser user;
 	private int number;
 	private int balance;
 	private int overdraw;
@@ -16,9 +16,9 @@ public class Account implements IAccount {
 		this.overdraw = 0;
 	}
 	
-	public Account(User user)
+	public Account(IUser user2)
 	{
-		this.user = user;
+		this.user = user2;
 		//TODO number
 		this.balance = 0;
 	}

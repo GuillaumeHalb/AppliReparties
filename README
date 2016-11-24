@@ -1,0 +1,41 @@
+Faire une jvm par noeud
+
+1er noeud
+Se connecter au serveur rmi
+s'enregistrer
+
+2e noeud
+se connecter
+recuperer le lien du premier pour se fixer au voisin
+
+...
+
+Le reseau est constitué.
+
+Pour un client : 
+
+Nouvelle JVM
+on se connecte
+
+Les banques sont connectées entre elles
+
+Réseau : n instances java
+JVM : programme qui permet d'exécuter du code. jvm <-> un process unix
++ 1 process rmi registry
++ client qui envoie des messages
+
+Il faut implémenter toutes les interfaces.
+
+main : new banknode a enregistrer auprès du rmi.
+       	   aller le chercher.
+
+RMI lancé sur un programme à part.
+
+Soutenance :
+10 minutes.
+On fournit le client.
+Montrer que la demande du client circule bien sur le réseau.
+Quelques slides pour montrer ce qu'on a fait, mais ne pas y passer 3h.
+Pas de rendu du code, mais le code sera examiné.
+Si possible, compiler en dehors d'eclipse.
+Le code sera peut-être pris après la soutenance pour y jetter un oeil.
