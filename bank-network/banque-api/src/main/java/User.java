@@ -17,19 +17,16 @@ public class User implements IUser {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return name;
 	}
 
 	@Override
 	public String getFirstName() {
-		// TODO Auto-generated method stub
 		return firstName;
 	}
 
 	@Override
 	public String getAge() {
-		// TODO Auto-generated method stub
 		return Integer.toString(age);
 	}
 
