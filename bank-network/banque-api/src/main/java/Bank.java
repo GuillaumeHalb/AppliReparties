@@ -9,7 +9,25 @@ import com.ensimag.api.bank.IUser;
 
 public class Bank implements IBank {
 	
+	private int bankID;
 	private List<IAccount> accountList;
+
+	
+	
+	public Bank(int bankID) {
+		super();
+		this.bankID = bankID;
+		this.accountList = null;
+	}
+
+
+	public Bank(int bankID, List<IAccount> accountList) {
+		super();
+		this.bankID = bankID;
+		this.accountList = accountList;
+	}
+
+
 
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {

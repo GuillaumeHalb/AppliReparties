@@ -31,7 +31,7 @@ public class BankNode implements IBankNode {
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
-		return this.bank.getAccout(number);
+		return this.bank.getAccount(number);
 	}
 
 	@Override
