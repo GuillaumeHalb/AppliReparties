@@ -29,14 +29,19 @@ public class Bank implements IBank {
 
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.accountList;
 	}
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		try
+		{
+			return this.accountList.get((int) number);
+		}
+		catch(Exception e)
+		{
+			throw new AccountNotFoundException();
+		}
 	}
 
 	@Override
