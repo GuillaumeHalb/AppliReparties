@@ -27,8 +27,6 @@ public class Bank implements IBank {
 		this.accountList = accountList;
 	}
 
-
-
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
 		return this.accountList;
@@ -62,7 +60,7 @@ public class Bank implements IBank {
 				throw new AccountNotFoundException("Account not in this bank");
 			}
 		}
-		return false;
+		throw new AccountNotFoundException();
 	}
 
 	@Override
