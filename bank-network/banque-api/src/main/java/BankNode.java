@@ -14,11 +14,17 @@ import com.ensimag.api.message.IResult;
 import com.ensimag.api.node.INode;
 
 public class BankNode implements IBankNode {
+// TODO: mettre ça ailleurs
+	public static int nodeNumber = 0;
 
+	
 	private List<IAccount> accountList;
+	private int id;
 	
 	public BankNode() {
 		accountList = new LinkedList<>();
+		id = BankNode.nodeNumber;
+		BankNode.nodeNumber++;
 	}
 	
 	@Override
@@ -44,20 +50,31 @@ public class BankNode implements IBankNode {
 
 	@Override
 	public boolean closeAccount(long number) throws AccountNotFoundException, RemoteException {
-		// TODO Auto-generated method stub
+		IAccount accountToClose = getAccount(number);
+		if (this.accountList.remove(accountToClose)) {
+			return true;
+		} else {
+			if (!this.accountList.contains(accountToClose)) {
+				throw new AccountNotFoundException("Account not in this bank");
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public long getId() throws RemoteException {
-		// TODO Auto-generated method stub
-		return 0;
+		// Numero du proccessus ?		
+		return this.nodeNumber;
 	}
 
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
-		// TODO Auto-generated method stub
-
+		// Check if the message is for this bank
+		/*if (message.getRecipientId() == this.nodeNumber) {
+			// Execute the action
+		} else {
+			// Transfer the message to the neighboor
+		}*/
 	}
 
 	@Override
