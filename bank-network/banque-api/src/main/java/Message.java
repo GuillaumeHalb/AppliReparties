@@ -1,22 +1,24 @@
+import com.ensimag.api.bank.IBankAction;
+import com.ensimag.api.bank.IBankMessage;
 import com.ensimag.api.message.EnumMessageType;
-import com.ensimag.api.message.IAction;
-import com.ensimag.api.message.IMessage;
 
-public class Message implements IMessage {
+public class Message implements IBankMessage {
 
-	private IAction action;
+	private static final long serialVersionUID = 1L;
+	
+	private IBankAction action;
 	private long messageId;
 	private long originalBankSenderId;
 	private long senderId;
 	private long destinationBankId;
 	private EnumMessageType messageType;
 	
-	public Message(IAction action, long messageId, long originalBankSenderId,
-			long senderId, long destinationBankId, EnumMessageType messageType) {
+	public Message(IBankAction action, long messageId, long originalBankSenderId,
+			long destinationBankId, EnumMessageType messageType) {
 		this.action = action;
 		this.messageId = messageId;
 		this.originalBankSenderId = originalBankSenderId;
-		this.senderId = senderId;
+		this.senderId = originalBankSenderId;
 		this.destinationBankId = destinationBankId;
 		this.messageType = messageType;
 	}
@@ -27,7 +29,7 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public IAction getAction() {
+	public IBankAction getAction() {
 		return this.action;
 	}
 
@@ -52,8 +54,8 @@ public class Message implements IMessage {
 	}
 
 	@Override
-	public IMessage clone() { 
-		return new Message(action, messageId, originalBankSenderId, senderId, destinationBankId, messageType);
+	public IBankMessage clone() { 
+		return new Message(action, messageId, originalBankSenderId, destinationBankId, messageType);
 	}
 
 	@Override

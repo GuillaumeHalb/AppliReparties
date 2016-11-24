@@ -14,9 +14,12 @@ import com.ensimag.api.message.IResult;
 import com.ensimag.api.node.INode;
 
 public class BankNode implements IBankNode {		
+
+	private static final long serialVersionUID = 1L;
+	
 	private Bank bank;
 	private int id;
-	private List<INode> neighboors;
+	private List<INode<IBankMessage>> neighboors;
 	
 	public BankNode(Bank bank, int id) {
 		this.bank = bank;
@@ -31,7 +34,7 @@ public class BankNode implements IBankNode {
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
-		return this.bank.getAccout(number);
+		return this.bank.getAccount(number);
 	}
 
 	@Override
@@ -59,15 +62,20 @@ public class BankNode implements IBankNode {
 		this.neighboors.remove(neighboor);
 	}
 	
-// Implement message before implemented those methods
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
-		// Check if the message is for this bank
-		/*if (message.getRecipientId() == this.nodeNumber) {
-			// Execute the action
+		if (message.getDestinationBankId() == this.bank.getBankId()) {
+			try {
+				message.getAction().execute(this);
+			} catch (Exception exception) {
+				throw new RemoteException("Error while executing message action");
+			}
 		} else {
-			// Transfer the message to the neighboor
-		}*/
+			message.setSenderId(this.id);
+			for (INode<IBankMessage> neighboor : this.neighboors) {
+				neighboor.onMessage(message);
+			}
+		}
 	}
 	
 	@Override
