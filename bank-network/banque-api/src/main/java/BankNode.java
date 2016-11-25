@@ -90,8 +90,8 @@ public class BankNode implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		// Send ack to the sender
-/*		INode<IBankMessage> sender = null;
+/*		// Send ack to the sender
+		INode<IBankMessage> sender = null;
 		for (INode<IBankMessage> neighboor : neighboors) {
 			if (neighboor.getId() == message.getSenderId()) {
 				sender = neighboor;
