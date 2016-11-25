@@ -1,4 +1,5 @@
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -15,7 +16,7 @@ public class Bank implements IBank {
 	public Bank(int bankID) {
 		super();
 		this.bankID = bankID;
-		this.accountList = null;
+		this.accountList = new ArrayList();
 	}
 
 
@@ -28,13 +29,22 @@ public class Bank implements IBank {
 
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
+		if(accountList == null){
+			throw new RemoteException();
+		}
+		
 		return this.accountList;
 	}
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
+		if(accountList == null){
+			throw new RemoteException();
+		}
+		
 		try
 		{
+			//Pq doit on le caster en int ?
 			return this.accountList.get((int) number);
 		}
 		catch(Exception e)
@@ -45,12 +55,21 @@ public class Bank implements IBank {
 
 	@Override
 	public IAccount openAccount(IUser user) throws RemoteException {
+		if(accountList == null){
+			throw new RemoteException();
+		}
+		
 		IAccount account = new Account(user);
+		this.accountList.add(account);
 		return account;
 	}
 
 	@Override
 	public boolean closeAccount(long number) throws AccountNotFoundException, RemoteException {
+		if(accountList == null){
+			throw new RemoteException();
+		}
+		
 		IAccount accountToClose = getAccount(number);
 		if (this.accountList.remove(accountToClose)) {
 			return true;
