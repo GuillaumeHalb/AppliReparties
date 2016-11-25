@@ -1,7 +1,8 @@
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
 
@@ -19,55 +20,86 @@ public class BankNode implements IBankNode {
 	
 	private Bank bank;
 	private int id;
-	private List<INode<IBankMessage>> neighboors;
+//	private List<INode<IBankMessage>> neighboors;
+	private Map<Long, BankNode> neighboors;
 	
 	public BankNode(Bank bank, int id) {
 		this.bank = bank;
 		this.id = id;
-		this.neighboors = new LinkedList<>();
+		this.neighboors = new HashMap<Long, BankNode>();
 	}
 	
 	@Override
 	public List<IAccount> getAccounts() throws RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return this.bank.getAccounts();
 	}
 
 	@Override
 	public IAccount getAccount(long number) throws AccountNotFoundException, RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return this.bank.getAccount(number);
 	}
 
 	@Override
-	public IAccount openAccount(IUser user) throws RemoteException {		
+	public IAccount openAccount(IUser user) throws RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return this.bank.openAccount(user);
 	}
 
 	@Override
 	public boolean closeAccount(long number) throws AccountNotFoundException, RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return this.bank.closeAccount(number);
 	}
 
 	@Override
 	public long getId() throws RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return this.id;
 	}
 
 	@Override
 	public void addNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
-		this.neighboors.add(neighboor);
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
+		this.neighboors.put(neighboor.getId(), (BankNode) neighboor);
 	}
 	
 	@Override
 	public void removeNeighboor(INode<IBankMessage> neighboor) throws RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		this.neighboors.remove(neighboor);
 	}
 	
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		// Send ack to the sender
-		message.getSenderId();
-		// IBankNode ackDestination = neighboors.
-		// Ack ack = new Ack(this.getId(), message.getMessageId());
+/*		INode<IBankMessage> sender = null;
+		for (INode<IBankMessage> neighboor : neighboors) {
+			if (neighboor.getId() == message.getSenderId()) {
+				sender = neighboor;
+			}
+		}
+		assert(sender != null);
+		Ack ack = new Ack(this.getId(), message.getMessageId());
+		sender.onAck(ack);
 		
 		if (message.getDestinationBankId() == this.bank.getBankId()) {
 			try {
@@ -80,24 +112,32 @@ public class BankNode implements IBankNode {
 			for (INode<IBankMessage> neighboor : this.neighboors) {
 				neighboor.onMessage(message);
 			}
+		} */
+	}
+	
+	//TODO
+	@Override
+	public void onAck(IAck ack) throws RemoteException {		
+		if (this.id < 0) {
+			throw new RemoteException();
 		}
 	}
 	
-	@Override
-	public void onAck(IAck ack) throws RemoteException {
-		// TODO Auto-generated method stub
-
-	}
-
+	//TODO
 	@Override
 	public List<IResult<? extends Serializable>> getResultForMessage(long messageId) throws RemoteException {
-		// TODO Auto-generated method stub
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return null;
 	}
-
+	
+	//TODO
 	@Override
 	public Boolean deliverResult(IResult<Serializable> result) throws RemoteException {
-		// TODO Auto-generated method stub
+		if (this.id < 0) {
+			throw new RemoteException();
+		}
 		return null;
 	}
 }
