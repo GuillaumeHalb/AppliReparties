@@ -1,10 +1,11 @@
 package com.ensimag.client;
 
-import com.ensimag.services.*;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+
+import com.ensimag.services.bank.IBankNode;
 
 public class Main {
     public static void main(String[] args) throws RemoteException, NotBoundException, MalformedURLException

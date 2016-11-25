@@ -1,9 +1,11 @@
 package com.ensimag.server.main;
 
 
-import com.ensimag.server.impl.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+
+import com.ensimag.server.impl.Bank;
+import com.ensimag.server.impl.BankNode;
 
 
 public class Main {
