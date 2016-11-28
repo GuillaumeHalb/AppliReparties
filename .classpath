@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Client/src/main/java"/>
+	<classpathentry excluding="com/ensimag/server/impl/" kind="src" path="Server/src/main/java"/>
+	<classpathentry kind="src" path="Server/src/main/java/com/ensimag/server/impl"/>
+	<classpathentry kind="src" path="Services/src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
