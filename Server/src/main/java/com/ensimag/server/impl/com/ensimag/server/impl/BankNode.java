@@ -3,18 +3,20 @@ package com.ensimag.server.impl;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.swing.text.DefaultEditorKit.InsertBreakAction;
 
-import com.ensimag.api.message.EnumMessageType;
+import com.ensimag.services.message.EnumMessageType;
 import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
 import com.ensimag.services.message.IAck;
+import com.ensimag.services.message.IMessage;
 import com.ensimag.services.message.IResult;
 import com.ensimag.services.node.INode;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ResultTreeType;
@@ -28,16 +30,16 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	
 	private Bank bank;
 	private long id;
-	private Map<Long, BankNode> neighboors; // BankNodeID, BankNode
-	private Map<IBankMessage, Int> ackAttente; // IBankMessage, nombre de ack en attente 
+	private List<BankNode> neighboors;
+	private Map<IBankMessage, Integer> ackAttente; // IBankMessage, nombre de ack en attente 
 	private LinkedList<IBankMessage> reicevedMessage; // Message this node has already received 
 	
 	public BankNode(Bank bank, long id) throws RemoteException {
 		super();		
 		this.bank = bank;
 		this.id = id;
-		this.neighboors = new HashMap<Long, BankNode>();
-		this.ackAttente = new HashMap<IBankMessage, Int>();
+		this.neighboors = new LinkedList<BankNode>();
+		this.ackAttente = new HashMap<IBankMessage, Integer>();
 		this.reicevedMessage = new LinkedList<IBankMessage>();
 	}
 	
@@ -86,7 +88,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		this.neighboors.put(neighboor.getId(), (BankNode) neighboor);
+		this.neighboors.add((BankNode) neighboor);
 	}
 	
 	@Override
@@ -98,7 +100,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	}
 	
 	@Override
-	public void onMessage(com.ensimag.api.bank.IBankMessage message) throws RemoteException {
+	public void onMessage(IBankMessage message) throws RemoteException {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
@@ -110,34 +112,39 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			//On ajoute le message à la liste des messages reçus
 			this.reicevedMessage.add(message);
 			// Si le message est pour tout le monde
-			if (message.getMessageType().BROADCAST) {
+			if (message.getMessageType() == EnumMessageType.BROADCAST) {
 				// On envoie un ack
 				Ack ack = new Ack(this.getId(), message.getMessageId());
-				INode<IBankMessage> sender = neighboors.get(message.getSenderId());
+				BankNode sender = this.getSender(message);				
 				sender.onAck(ack);
+				
 				// On execute l'action
-				ResultType result = message.getAction().execute(this);
+				try {
+					Object result = message.getAction().execute(this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				// On envoie le résultat à l'envoyeur initial
 				long messageId = -1; //TODO: find right number
-				com.ensimag.api.bank.IBankMessage returnResultMessage = new Message(null, messageId, this.getId(), message.getOriginalBankSenderId(), EnumMessageType.DELIVERY);
-				neighboors.get(message.getSenderId()).onMessage(returnResultMessage);
+				IBankMessage returnResultMessage = new Message(null, messageId, this.getId(), message.getOriginalBankSenderId(), EnumMessageType.DELIVERY);
+				this.getSender(message).onMessage(returnResultMessage);
 				// On attend un ack
-				this.ackAttente.add(returnResultMessage, 1);
+				this.ackAttente.put(returnResultMessage, 1);
 				// On fait tourner aux voisins qui ne l'ont pas encore eu
 				for (BankNode neighboor : this.neighboors) {
 					if (neighboor.getId() != message.getSenderId()) {
-						com.ensimag.api.bank.IBankMessage copie = message.clone();
+						IBankMessage copie = message.clone();
 						copie.setSenderId(this.getId());
 						neighboor.onMessage(copie);
 					}
 				}
-			} else if (message.getMessageType().SINGLE_DEST) {
+			} else if (message.getMessageType() == EnumMessageType.SINGLE_DEST) {
 				// Si c'est pas pour nous
 				if (!(message.getDestinationBankId() == this.getId())) {
 					// on fait tourner aux voisins
 					for (BankNode neighboor : this.neighboors) {
 						if (neighboor.getId() != message.getSenderId()) {
-							com.ensimag.api.bank.IBankMessage copie = message.clone();
+							IBankMessage copie = message.clone();
 							copie.setSenderId(this.getId());
 							neighboor.onMessage(copie);
 						}
@@ -145,23 +152,27 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				} else { // C'est pour nous
 					// on envoie un ack
 					Ack ack = new Ack(this.getId(), message.getMessageId());
-					neighboors.get(message.getSenderId()).onAck(ack);
+					this.getSender(message).onAck(ack);
 					// On exécute l'action
-					ResultType result = message.getAction().execute(this);
+					try {
+						Object result = message.getAction().execute(this);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					// On envoie le résultat
 					long messageId = -1; //TODO: find right number
-					com.ensimag.api.bank.IBankMessage returnResultMessage = new Message(null, messageId, this.getId(), message.getOriginalBankSenderId(), EnumMessageType.DELIVERY);
-					neighboors.get(message.getSenderId()).onMessage(returnResultMessage);
+					IBankMessage returnResultMessage = new Message(null, messageId, this.getId(), message.getOriginalBankSenderId(), EnumMessageType.DELIVERY);
+					this.getSender(message).onMessage(returnResultMessage);
 					// On attend un ack
-					this.ackAttente.add(returnResultMessage, 1);
+					this.ackAttente.put(returnResultMessage, 1);
 				}
-			} else if (message.getMessageType().DELIVERY) {
+			} else if (message.getMessageType() == EnumMessageType.DELIVERY) {
 				// Si ce n'est pas pour nous
 				if (!(message.getDestinationBankId() == this.getId())) {
 					// On fait tourner aux voisons
 					for (BankNode neighboor : this.neighboors) {
 						if (neighboor.getId() != message.getSenderId()) {
-							com.ensimag.api.bank.IBankMessage copie = message.clone();
+							IBankMessage copie = message.clone();
 							copie.setSenderId(this.getId());
 							neighboor.onMessage(copie);
 						}
@@ -169,11 +180,24 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				} else { // Si c'est pour nous
 					// On envoie un ack
 					Ack ack = new Ack(this.getId(), message.getMessageId());
-					this.neighboors.get(message.getSenderId()).onAck(ack);
+					this.getSender(message).onAck(ack);
 					// TODO: que faire d'autres ?
 				}
 			}
 		}
+	}
+	
+	private BankNode getSender(IBankMessage message) throws RemoteException {
+		BankNode sender = null;
+		for (BankNode neighboor : neighboors) {
+			if (neighboor.getId() == message.getSenderId()) {
+				sender = neighboor;
+			}
+		}
+		if (sender == null) {
+			throw new RemoteException("Sender is not in the neighboors");
+		}
+		return sender;
 	}
 	
 	//TODO
