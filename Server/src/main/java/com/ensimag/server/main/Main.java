@@ -15,17 +15,18 @@ public class Main {
 
 	private void start(String BankName, int BankId) {
 		try {
-			Registry registry = LocateRegistry.getRegistry();
+			Registry registry = LocateRegistry.getRegistry(1099);
 			BankNode bank = new BankNode(new Bank(BankId),BankId);
 			//bank.addNeighboor((IBankNode) Naming.lookup("rmi://localhost/Natixis"));
 			registry.rebind(BankName, bank);
+			System.out.println("Bank " + BankName + "," + BankId + " initialized");
 			
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
-		System.out.println("Bank " + BankName + "," + BankId + " initialized");
+		
 	}
 
 	public static void main(String[] args) {
