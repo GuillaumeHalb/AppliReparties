@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
+import javax.swing.text.DefaultEditorKit.InsertBreakAction;
 
 import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IBankMessage;
@@ -25,14 +26,17 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	
 	private Bank bank;
 	private int id;
-//	private List<INode<IBankMessage>> neighboors;
-	private Map<Long, BankNode> neighboors;
+	private Map<Int, BankNode> neighboors; // BankNodeID, BankNode
+	private Map<IBankMessage, Int> ackAttente; // IBankMessage, nombre de ack en attente 
+	private LinkedList<IBankMessage> reicevedMessage; // Message this node has already received 
 	
 	public BankNode(Bank bank, int id) throws RemoteException {
 		super();		
 		this.bank = bank;
 		this.id = id;
-		this.neighboors = new HashMap<Long, BankNode>();
+		this.neighboors = new HashMap<Int, BankNode>();
+		this.ackAttente = new HashMap<IBankMessage, Int>();
+		this.reicevedMessage = new LinkedList<IBankMessage>();
 	}
 	
 	@Override
@@ -96,6 +100,10 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
+		
+		// Check if the message has already been received
+		if (this.reicevedMessage)
+		
 		// Send ack to the sender
 /*		INode<IBankMessage> sender = null;
 		for (INode<IBankMessage> neighboor : neighboors) {
