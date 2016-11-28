@@ -1,19 +1,17 @@
 package com.ensimag.server.main;
 
-
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 
-
-public class Main {
+public class Natixis {
 
 	private void start() {
 		try {
 			Registry registry = LocateRegistry.createRegistry(1099);
-			registry.rebind("1000", new BankNode(new Bank(1),1));
+			registry.rebind("Natixis", new BankNode(new Bank(3),3));
 			
 		}
 		catch(Exception e)
@@ -22,11 +20,10 @@ public class Main {
 		}
 		System.out.println("Bank initialized");
 	}
-
 	public static void main(String[] args) {
-		Main main = new Main();
+		Natixis main = new Natixis();
 		main.start();
+
 	}
-	
 
 }
