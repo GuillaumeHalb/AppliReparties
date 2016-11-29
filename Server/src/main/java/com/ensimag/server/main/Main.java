@@ -17,15 +17,10 @@ import com.ensimag.services.bank.IBankNode;
 public class Main {
 
 	//Neighboors : liste des banNode séparés par des ,
-	private void start(String BankName, int BankId, String Neighboors) {
+	private void start(String BankName, int BankId) {
 		try {
 			Registry registry = LocateRegistry.getRegistry(1099);
 			BankNode bank = new BankNode(new Bank(BankId,BankName),BankId);
-			String[] neighboorsList =  Neighboors.split(",");
-			for(String neighboor : neighboorsList)
-			{
-				bank.addNeighboor((IBankNode) Naming.lookup("rmi://localhost/"+neighboor));
-			}
 			registry.rebind(BankName, bank);
 			System.out.println("Bank " + BankName + "," + BankId + " initialized");
 			
@@ -36,31 +31,42 @@ public class Main {
 		}
 		
 	}
+	
+	private void addNeighboors(String BankName,String Neighboors)
+	{
+		try {
+			Registry registry = LocateRegistry.getRegistry(1099);
+			BankNode bank = (BankNode) Naming.lookup("rmi://localhost/" + BankName);
+			String[] neighboorsList =  Neighboors.split(",");
+			for(String neighboor : neighboorsList)
+			{
+				bank.addNeighboor((BankNode) Naming.lookup("rmi://localhost/" + neighboor));
+			}
+		} catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
 		if (args[0].equals("rmi"))
 		{
 			try {
-				LocateRegistry.createRegistry(1099);		 
-				//System.out.println("Mise en place du Security Manager ...");
-				//if (System.getSecurityManager() == null) {
-				//System.setSecurityManager(new RMISecurityManager());
-				//}
+				LocateRegistry.createRegistry(1099);
 				User user = new User("Premier","Client",20);
-				String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + "/TestRMI";
+				String url = "rmi://localhost/TestRMI";
 				System.out.println("Enregistrement de l'objet avec l'url : " + url);
-				Naming.rebind(url, (Remote) user);
+				Naming.rebind(url, user);
 				System.out.println("Serveur lancé");
 				} catch (RemoteException e) {
 				e.printStackTrace();
 				} catch (MalformedURLException e) {
 				e.printStackTrace();
-				} catch (UnknownHostException e) {
-				e.printStackTrace();
 				}
 		} else
 		{
 			Main main = new Main();
-			main.start(args[0],Integer.parseInt(args[1]),args[2]);
+			main.start(args[0],Integer.parseInt(args[1]));
+			main.addNeighboors(args[0], args[2]);
 		}
 	}
 	
