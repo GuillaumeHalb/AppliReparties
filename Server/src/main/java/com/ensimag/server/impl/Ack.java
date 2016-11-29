@@ -1,4 +1,5 @@
 package com.ensimag.server.impl;
+
 import com.ensimag.services.message.IAck;
 
 public class Ack implements IAck {

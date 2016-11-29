@@ -13,7 +13,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
-    
+
    <build>
         <plugins>
             <plugin>
@@ -49,13 +49,19 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin> 
+            </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>com.ensimag</groupId>
             <artifactId>Services</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.ensimag</groupId>
+            <artifactId>Server</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>

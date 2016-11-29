@@ -5,17 +5,14 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 import com.ensimag.server.impl.User;
 import com.ensimag.services.bank.IBankNode;
-
 
 public class Main {
 
@@ -39,7 +36,6 @@ public class Main {
 		}
 		
 	}
-
 	public static void main(String[] args) {
 		if (args[0].equals("rmi"))
 		{
@@ -52,7 +48,7 @@ public class Main {
 				User user = new User("Premier","Client",20);
 				String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + "/TestRMI";
 				System.out.println("Enregistrement de l'objet avec l'url : " + url);
-				Naming.rebind(url, user);
+				Naming.rebind(url, (Remote) user);
 				System.out.println("Serveur lancé");
 				} catch (RemoteException e) {
 				e.printStackTrace();
@@ -64,7 +60,7 @@ public class Main {
 		} else
 		{
 			Main main = new Main();
-			main.start(args[0],Integer.parseInt(args[1]));
+			main.start(args[0],Integer.parseInt(args[1]),args[2]);
 		}
 	}
 	

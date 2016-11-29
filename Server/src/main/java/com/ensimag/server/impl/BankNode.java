@@ -2,27 +2,21 @@ package com.ensimag.server.impl;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
-import javax.swing.text.DefaultEditorKit.InsertBreakAction;
 
-import com.ensimag.services.message.EnumMessageType;
 import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
 import com.ensimag.services.message.IAck;
-import com.ensimag.services.message.IMessage;
 import com.ensimag.services.message.IResult;
 import com.ensimag.services.node.INode;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ResultTreeType;
-
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.RemoteException;
 
 public class BankNode extends UnicastRemoteObject implements IBankNode {		
 
