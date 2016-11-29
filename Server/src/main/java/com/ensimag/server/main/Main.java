@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -32,35 +33,36 @@ public class Main {
 		
 	}
 	
-	private void addNeighboors(String BankName,String Neighboors)
+	private void addNeighboors(String BankName,String Neighboors) throws RemoteException, NotBoundException, MalformedURLException
 	{
-		try {
-			Registry registry = LocateRegistry.getRegistry(1099);
-			BankNode bank = (BankNode) Naming.lookup("rmi://localhost/" + BankName);
-			String[] neighboorsList =  Neighboors.split(",");
+		Registry registry = LocateRegistry.getRegistry(1099);
+		IBankNode sgb = (IBankNode) registry.lookup("SGb");
+		System.out.println("sbgid: " + sgb.getId());
+		System.out.println("Avant");
+		IBankNode bank = (IBankNode) Naming.lookup("rmi://localhost/" + BankName);
+		System.out.println("id : " + bank.getId());
+ 			String[] neighboorsList =  Neighboors.split(",");
 			for(String neighboor : neighboorsList)
 			{
-				bank.addNeighboor((BankNode) Naming.lookup("rmi://localhost/" + neighboor));
+				bank.addNeighboor((IBankNode) Naming.lookup("rmi://localhost/" + neighboor));
 			}
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		
 	}
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
 		if (args[0].equals("rmi"))
 		{
 			try {
-				LocateRegistry.createRegistry(1099);
-				User user = new User("Premier","Client",20);
-				String url = "rmi://localhost/TestRMI";
-				System.out.println("Enregistrement de l'objet avec l'url : " + url);
-				Naming.rebind(url, user);
-				System.out.println("Serveur lancé");
+					Registry registry = LocateRegistry.createRegistry(1099);
+					User user = new User("Premier","Client",20);
+					String url = "TestRMI";
+					System.out.println("Enregistrement de l'objet avec le nom : " + url);
+					registry.rebind(url, user);
+					System.out.println("enregistrement de SG");
+					BankNode bank = new BankNode(new Bank(10,"SGb"),10);
+					registry.rebind("SGb", bank);
+					System.out.println("Serveur lancé");
 				} catch (RemoteException e) {
-				e.printStackTrace();
-				} catch (MalformedURLException e) {
-				e.printStackTrace();
+					e.printStackTrace();
 				}
 		} else
 		{
