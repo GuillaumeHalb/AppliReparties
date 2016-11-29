@@ -1,6 +1,6 @@
 #!/bin/sh
 
-xterm --hold -e java -jar Server/target/*.jar rmi &
-xterm -hold -e java -jar Server/target/*.jar SG 1 &
-xterm -hold -e java -jar Server/target/*.jar BNP 2 &
-xterm -hold -e java -jar Server/target/*.jar Natixis 3 &
+gnome-terminal --execute java -jar Server/target/*.jar rmi
+gnome-terminal --execute java -jar Server/target/*.jar SG 1 BNP
+gnome-terminal --execute java -jar Server/target/*.jar BNP 2 Natixis
+gnome-terminal --execute java -jar Server/target/*.jar Natixis 3 SG

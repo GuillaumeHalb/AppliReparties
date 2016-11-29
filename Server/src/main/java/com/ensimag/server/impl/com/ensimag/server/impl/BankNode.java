@@ -36,9 +36,9 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	
 	public BankNode(Bank bank, long id) throws RemoteException {
 		super();		
-		this.bank = bank;
+		this.setBank(bank);
 		this.id = id;
-		this.neighboors = new LinkedList<BankNode>();
+		this.setNeighboors(new LinkedList<BankNode>());
 		this.ackAttente = new HashMap<IBankMessage, Integer>();
 		this.reicevedMessage = new LinkedList<IBankMessage>();
 	}
@@ -48,7 +48,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		return this.bank.getAccounts();
+		return this.getBank().getAccounts();
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		return this.bank.getAccount(number);
+		return this.getBank().getAccount(number);
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		return this.bank.openAccount(user);
+		return this.getBank().openAccount(user);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		return this.bank.closeAccount(number);
+		return this.getBank().closeAccount(number);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		this.neighboors.add((BankNode) neighboor);
+		this.getNeighboors().add((BankNode) neighboor);
 	}
 	
 	@Override
@@ -96,7 +96,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		this.neighboors.remove(neighboor);
+		this.getNeighboors().remove(neighboor);
 	}
 	
 	@Override
@@ -131,7 +131,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				// On attend un ack
 				this.ackAttente.put(returnResultMessage, 1);
 				// On fait tourner aux voisins qui ne l'ont pas encore eu
-				for (BankNode neighboor : this.neighboors) {
+				for (BankNode neighboor : this.getNeighboors()) {
 					if (neighboor.getId() != message.getSenderId()) {
 						IBankMessage copie = message.clone();
 						copie.setSenderId(this.getId());
@@ -142,7 +142,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				// Si c'est pas pour nous
 				if (!(message.getDestinationBankId() == this.getId())) {
 					// on fait tourner aux voisins
-					for (BankNode neighboor : this.neighboors) {
+					for (BankNode neighboor : this.getNeighboors()) {
 						if (neighboor.getId() != message.getSenderId()) {
 							IBankMessage copie = message.clone();
 							copie.setSenderId(this.getId());
@@ -170,7 +170,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				// Si ce n'est pas pour nous
 				if (!(message.getDestinationBankId() == this.getId())) {
 					// On fait tourner aux voisons
-					for (BankNode neighboor : this.neighboors) {
+					for (BankNode neighboor : this.getNeighboors()) {
 						if (neighboor.getId() != message.getSenderId()) {
 							IBankMessage copie = message.clone();
 							copie.setSenderId(this.getId());
@@ -189,7 +189,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	
 	private BankNode getSender(IBankMessage message) throws RemoteException {
 		BankNode sender = null;
-		for (BankNode neighboor : neighboors) {
+		for (BankNode neighboor : getNeighboors()) {
 			if (neighboor.getId() == message.getSenderId()) {
 				sender = neighboor;
 			}
@@ -224,5 +224,21 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			throw new RemoteException();
 		}
 		return null;
+	}
+
+	public Bank getBank() {
+		return bank;
+	}
+
+	public void setBank(Bank bank) {
+		this.bank = bank;
+	}
+
+	public List<BankNode> getNeighboors() {
+		return neighboors;
+	}
+
+	public void setNeighboors(List<BankNode> neighboors) {
+		this.neighboors = neighboors;
 	}
 }

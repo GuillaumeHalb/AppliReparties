@@ -12,20 +12,23 @@ import com.ensimag.services.bank.IUser;
 
 public class Bank implements IBank {
 	
+	private String bankName;
 	private int bankID;
 	private List<IAccount> accountList;
 
-	public Bank(int bankID) {
+	public Bank(int bankID, String bankName) {
 		super();
 		this.bankID = bankID;
 		this.accountList = new ArrayList<IAccount>();
+		this.setBankName(bankName);
 	}
 
 
-	public Bank(int bankID, List<IAccount> accountList) {
+	public Bank(int bankID, List<IAccount> accountList, String bankName) {
 		super();
 		this.bankID = bankID;
 		this.accountList = accountList;
+		this.setBankName(bankName);
 	}
 
 
@@ -86,6 +89,16 @@ public class Bank implements IBank {
 	@Override
 	public long getBankId() {
 		return this.bankID;
+	}
+
+
+	public String getBankName() {
+		return bankName;
+	}
+
+
+	public void setBankName(String bankName) {
+		this.bankName = bankName;
 	}
 
 }
