@@ -26,7 +26,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	private Bank bank;
 	private long id;
 	// Liste des voisins
-	private List<BankNode> neighboors;
+	private List<IBankNode> neighboors;
 	// waitS = Liste de BankNodeId dont on attend un ack pour le message Id
 	// Si List<BankNodeId> est vide, on n'attend plus de ack pour ce message.
 	private Map<Long, List<Long>> waitS;  
@@ -41,7 +41,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		super();		
 		this.setBank(bank);
 		this.id = id;
-		this.neighboors = new LinkedList<BankNode>();
+		this.neighboors = new LinkedList<IBankNode>();
 		this.waitS = new HashMap<Long, List<Long>>();
 		this.up = new HashMap<IBankMessage, Long>();
 		this.deja_vu = new LinkedList<IBankMessage>();
@@ -92,7 +92,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		this.getNeighboors().add((BankNode) neighboor);
+		this.getNeighboors().add((IBankNode) neighboor);
 	}
 	
 	@Override
@@ -128,7 +128,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			this.deja_vu.add(message);
 			assert(message.getSenderId() != 0);
 			this.up.put(message, message.getSenderId());
-			for (BankNode neighboor : this.neighboors) {
+			for (IBankNode neighboor : this.neighboors) {
 				if (!(message.getSenderId() == neighboor.getId())) {
 					List<Long> listWaitedAck = this.waitS.get(message.getMessageId());
 					listWaitedAck.add(neighboor.getId());
@@ -230,9 +230,9 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}*/
 	}
 	
-	private BankNode getSender(IBankMessage message) throws RemoteException {
-		BankNode sender = null;
-		for (BankNode neighboor : getNeighboors()) {
+	private IBankNode getSender(IBankMessage message) throws RemoteException {
+		IBankNode sender = null;
+		for (IBankNode neighboor : getNeighboors()) {
 			if (neighboor.getId() == message.getSenderId()) {
 				sender = neighboor;
 			}
@@ -281,7 +281,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (listAckWaited.size() == 0) {
 			if (this.up.get(ack.getAckMessageId()) != 0) {
 				boolean neighboorFound = false;
-				for (BankNode neighboor : this.neighboors) {
+				for (IBankNode neighboor : this.neighboors) {
 					if (neighboor.getId() == this.up.get(ack.getAckMessageId())) {
 						neighboor.onAck(ack);
 						neighboorFound = true;
@@ -322,11 +322,11 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		this.bank = bank;
 	}
 
-	public List<BankNode> getNeighboors() {
+	public List<IBankNode> getNeighboors() {
 		return neighboors;
 	}
 
-	public void setNeighboors(List<BankNode> neighboors) {
+	public void setNeighboors(List<IBankNode> neighboors) {
 		this.neighboors = neighboors;
 	}
 }
