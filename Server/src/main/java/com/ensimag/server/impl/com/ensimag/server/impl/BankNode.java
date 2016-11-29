@@ -30,17 +30,26 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	
 	private Bank bank;
 	private long id;
+	// Liste des voisins
 	private List<BankNode> neighboors;
-	private Map<IBankMessage, Integer> ackAttente; // IBankMessage, nombre de ack en attente 
-	private LinkedList<IBankMessage> reicevedMessage; // Message this node has already received 
+	// waitS = Liste de BankNodeId dont on attend un ack pour le message Id
+	// Si List<BankNodeId> est vide, on n'attend plus de ack pour ce message.
+	private Map<Long, List<Long>> waitS;  
+	// Noeud up 
+	// BankNodeId à qui je dois renvoyer le ack pour le message
+	private Map<IBankMessage, Long> up;
+	// boolean déjà_vu
+	// Si IBankMessage appartient à la liste, on a déjà reçu le message (boolean = true)
+	private LinkedList<IBankMessage> deja_vu; 
 	
 	public BankNode(Bank bank, long id) throws RemoteException {
 		super();		
 		this.setBank(bank);
 		this.id = id;
-		this.setNeighboors(new LinkedList<BankNode>());
-		this.ackAttente = new HashMap<IBankMessage, Integer>();
-		this.reicevedMessage = new LinkedList<IBankMessage>();
+		this.neighboors = new LinkedList<BankNode>();
+		this.waitS = new HashMap<Long, List<Long>>();
+		this.up = new HashMap<IBankMessage, Long>();
+		this.deja_vu = new LinkedList<IBankMessage>();
 	}
 	
 	@Override
@@ -99,12 +108,39 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		this.getNeighboors().remove(neighboor);
 	}
 	
+	
+	// TODO: execute actions
 	@Override
 	public void onMessage(IBankMessage message) throws RemoteException {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
 		
+		// Noeud non puit et message non déjà vu
+		if (!this.isWellNode() && !this.alreadySeen(message)) {
+			this.deja_vu.add(message);
+			assert(message.getSenderId() != 0);
+			this.up.put(message, message.getSenderId());
+			for (BankNode neighboor : this.neighboors) {
+				if (!(message.getSenderId() == neighboor.getId())) {
+					List<Long> listWaitedAck = this.waitS.get(message.getMessageId());
+					listWaitedAck.add(neighboor.getId());
+					// TODO: check if this.waitS a bien été rempli. 
+					// Sinon, cloner neighboor ou remplacer la liste à chaque fois. 
+					IBankMessage messageCloned = message.clone();
+					messageCloned.setSenderId(this.id);
+					neighboor.onMessage(messageCloned);
+				}
+			}
+			// Expected : list of all neighboors excepted one
+			System.out.println("BankNode waitS update: " + this.waitS.get(message));
+		} else if (this.isWellNode() || this.alreadySeen(message)) {
+			Ack ack = new Ack(this.id, message.getMessageId());
+			getSender(message).onAck(ack);
+		}
+		
+		
+		/*
 		// Check if the message has already been received
 		if (this.reicevedMessage.contains(message)) {
 			System.out.println("BankNode " + this.getId() + " already received: " + message.getMessageId());
@@ -184,7 +220,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 					// TODO: que faire d'autres ?
 				}
 			}
-		}
+		}*/
 	}
 	
 	private BankNode getSender(IBankMessage message) throws RemoteException {
@@ -200,11 +236,56 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		return sender;
 	}
 	
+	private boolean alreadySeen(IBankMessage message) {
+		if (this.deja_vu.contains(message)) {
+			return true;
+		}
+		return false;
+	}
+	
+	// Returns true if this node is a well
+	private boolean isWellNode() {
+		if (this.neighboors.size() == 1) {
+			return true;
+		}
+		return false;
+	}
+	
 	//TODO
 	@Override
 	public void onAck(IAck ack) throws RemoteException {		
 		if (this.id < 0) {
 			throw new RemoteException();
+		}
+		System.out.println("BankNode onAck listAckWaited avant suppression du nouveau ack : " + this.waitS.get(ack.getAckMessageId()));
+		List<Long> listAckWaited = this.waitS.get(ack.getAckMessageId());
+		boolean removed = false;
+		for (int i = 0; i < listAckWaited.size(); i++) {
+			if (listAckWaited.get(i) == ack.getAckSenderId()) {
+				listAckWaited.remove(i);
+				removed = true;
+			}
+		}
+		if (!removed) {
+			System.out.println("PB: BankNode onAck: no element deleted. Didn't expected ack from " + ack.getAckSenderId());
+		}
+		// Expected : un élément en moins.
+		System.out.println("BankNode onAck listAckWaited après suppression du nouveau ack : " + this.waitS.get(ack.getAckMessageId()));
+		if (listAckWaited.size() == 0) {
+			if (this.up.get(ack.getAckMessageId()) != 0) {
+				boolean neighboorFound = false;
+				for (BankNode neighboor : this.neighboors) {
+					if (neighboor.getId() == this.up.get(ack.getAckMessageId())) {
+						neighboor.onAck(ack);
+						neighboorFound = true;
+					}
+				}
+				if (!neighboorFound) {
+					System.out.println("PB: BankNode onAck: neighboor not found to send ack.");
+				}
+			} else { // On est revenu au premier envoyeur : fin de la vague
+				System.out.println("Ack back to primary sender : OK");
+			}
 		}
 	}
 	
