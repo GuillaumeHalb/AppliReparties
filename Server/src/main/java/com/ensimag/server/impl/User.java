@@ -1,8 +1,11 @@
 package com.ensimag.server.impl;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
 import com.ensimag.services.bank.IUser;
 
-public class User implements IUser {
+public class User extends UnicastRemoteObject implements IUser {
 
 	private static final long serialVersionUID = 3355610152396539315L;
 	
@@ -12,7 +15,7 @@ public class User implements IUser {
 
 	
 	
-	public User(String name, String firstName, int age) {
+	public User(String name, String firstName, int age) throws RemoteException {
 		super();
 		this.name = name;
 		this.firstName = firstName;
