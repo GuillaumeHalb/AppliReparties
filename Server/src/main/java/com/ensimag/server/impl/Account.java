@@ -39,19 +39,18 @@ public class Account implements IAccount {
 
 	@Override
 	public int add(int amount) {
+		assert(amount >= 0);
 		this.balance += amount;
 		return 0;
 	}
 
 	@Override
 	public int remove(int amount) throws NotEnoughMoneyException {
-		if (this.balance + this.overdraw >= amount)
-		{
+		assert(amount >= 0);
+		if (this.balance + this.overdraw >= amount)	{
 			this.balance -= amount;
 			return 0;
-		}
-		else
-		{
+		} else {
 			throw new NotEnoughMoneyException(this);
 		}
 	}
@@ -63,8 +62,10 @@ public class Account implements IAccount {
 
 	@Override
 	public int setAllowedOverdraw(int overdraw) {
+		assert(overdraw >= 0);
+		
 		this.overdraw = overdraw;
-		return 0;
+		return this.overdraw;
 	}
 
 }
