@@ -15,6 +15,7 @@ import com.ensimag.services.bank.IBank;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
+import com.ensimag.services.message.EnumMessageType;
 import com.ensimag.services.message.IAck;
 import com.ensimag.services.message.IResult;
 import com.ensimag.services.node.INode;
@@ -109,6 +110,18 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	public void onMessage(IBankMessage message) throws RemoteException {
 		if (this.id < 0) {
 			throw new RemoteException();
+		}
+		
+		// Si le message est pour nous
+		if (message.getMessageType() == EnumMessageType.SINGLE_DEST 
+				&& message.getDestinationBankId() == this.id) {
+			// On envoie un ack
+			
+			// On execute l'action
+			//this.deliverResult(message.getAction().execute(this));
+			
+			// On envoie le résultat
+			
 		}
 		
 		// Noeud non puit et message non déjà vu
