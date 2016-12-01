@@ -6,33 +6,36 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
+import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 import com.ensimag.services.bank.IBankNode;
 
 public class Main {
     public static void main(String[] args) throws RemoteException, NotBoundException, MalformedURLException
     {
-    	 ArrayList<BankNode> bankNodeList = new ArrayList<BankNode>();
-         BankNode SG = (BankNode) Naming.lookup("rmi://localhost/SG");
-         bankNodeList.add(SG);
-         BankNode BNP = (BankNode) Naming.lookup("rmi://localhost/BNP");
+    	 ArrayList<IBankNode> bankNodeList = new ArrayList<IBankNode>();
+         IBankNode SG = (IBankNode) Naming.lookup("rmi://localhost/SG");
+         bankNodeList.add( SG);
+         IBankNode BNP = (IBankNode) Naming.lookup("rmi://localhost/BNP");
          bankNodeList.add(BNP);
-         BankNode Natixis = (BankNode) Naming.lookup("rmi://localhost/Natixis");
+         IBankNode Natixis = (IBankNode) Naming.lookup("rmi://localhost/Natixis");
          bankNodeList.add(Natixis);
          
          
         
         try {            
-	            for(BankNode bank : bankNodeList)
+	            for(IBankNode bank : bankNodeList)
 	            {
-	           	 System.out.println("Name : " + bank.getBank());
+	           	 System.out.println("Name : " + bank.getBankName());
 	           	 System.out.println("Id : " + bank.getId());
-	           	 for (BankNode neighboor : bank.getNeighboors())
+	           	 System.out.println("\t Neighboors :");
+	           	 for (IBankNode neighboor : bank.getNeighboors())
 	           	 	{
-	           		 System.out.println(neighboor.getBank().getBankName());
+	           		 System.out.println("\t Name : " + neighboor.getBankName());
+	           		 System.out.println("\t Id : " + neighboor.getId());
+	           		 
 	           	 	}
 	            }
-	    //            System.out.println(op.div(33,0));        
         } catch (Exception e)
         {
             System.err.println(e);

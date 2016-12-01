@@ -35,10 +35,8 @@ public class Main {
 	
 	private void addNeighboors(String BankName,String Neighboors) throws RemoteException, NotBoundException, MalformedURLException
 	{
+		System.out.println("on rentre...");
 		Registry registry = LocateRegistry.getRegistry(1099);
-		IBankNode sgb = (IBankNode) registry.lookup("SGb");
-		System.out.println("sbgid: " + sgb.getId());
-		System.out.println("Avant");
 		IBankNode bank = (IBankNode) Naming.lookup("rmi://localhost/" + BankName);
 		System.out.println("id : " + bank.getId());
  			String[] neighboorsList =  Neighboors.split(",");
@@ -57,9 +55,6 @@ public class Main {
 					String url = "TestRMI";
 					System.out.println("Enregistrement de l'objet avec le nom : " + url);
 					registry.rebind(url, user);
-					System.out.println("enregistrement de SG");
-					BankNode bank = new BankNode(new Bank(10,"SGb"),10);
-					registry.rebind("SGb", bank);
 					System.out.println("Serveur lancé");
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -67,8 +62,10 @@ public class Main {
 		} else
 		{
 			Main main = new Main();
-			main.start(args[0],Integer.parseInt(args[1]));
-			main.addNeighboors(args[0], args[2]);
+			if (args[2].equals("start"))
+				main.start(args[0],Integer.parseInt(args[1]));
+			else if (args[2].equals("add"))
+				main.addNeighboors(args[0], args[1]);
 		}
 	}
 	

@@ -13,5 +13,7 @@ public interface IBank extends IBankOperations {
 	 * @return bank id
 	 */
 	long getBankId();
+	
+	String getBankName();
 
 }
