@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.security.auth.login.AccountNotFoundException;
 
 import com.ensimag.services.bank.IAccount;
+import com.ensimag.services.bank.IBank;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
@@ -316,7 +317,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		return null;
 	}
 
-	public Bank getBank() {
+	public IBank getBank() {
 		return bank;
 	}
 
@@ -324,11 +325,16 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		this.bank = bank;
 	}
 
-	public List<IBankNode> getNeighboors() {
+	public List<IBankNode> getNeighboors() throws RemoteException {
 		return neighboors;
 	}
 
 	public void setNeighboors(List<IBankNode> neighboors) {
 		this.neighboors = neighboors;
+	}
+
+	@Override
+	public String getBankName() throws RemoteException{
+		return bank.getBankName();
 	}
 }
