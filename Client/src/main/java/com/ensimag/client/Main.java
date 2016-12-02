@@ -1,5 +1,6 @@
 package com.ensimag.client;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -9,13 +10,23 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.ensimag.server.impl.AddAccount;
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
+import com.ensimag.server.impl.Message;
 import com.ensimag.server.impl.User;
+import com.ensimag.services.bank.IBankAction;
+import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
+import com.ensimag.services.message.EnumMessageType;
+import com.ensimag.services.message.IAction;
+import com.ensimag.services.message.IMessage;
+import com.ensimag.services.message.IResult;
 
 public class Main {
+	
+	private static long messageId = 0;
 	
 	public static void afficherListeBanques(ArrayList<IBankNode> bankNodeList) throws RemoteException {
 		for (IBankNode bank : bankNodeList) {
@@ -58,7 +69,7 @@ public class Main {
 		}
 
 		// On n'enregistre pas les clients pour le moment
-
+/*
 		Scanner scanner = new Scanner(System.in);
 
 		System.out.println("Nouveau client ? oui/non");
@@ -67,9 +78,23 @@ public class Main {
 			System.out.println("Ecrire oui ou non");
 			reponse = scanner.nextLine();
 		}
-
-		User client;
+*/
 		
+		// Le client est à GoldmannSachs et il veut ouvrir un compte à JPMorgan
+		// On attend en retour le numéro du compte
+		
+		IUser client = (IUser) Naming.lookup("rmi://localhost/client");
+		//IUser client = new User("Lebit", "Benj", 23);
+		IBankAction action = new AddAccount(client);
+		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), JPMorgan.getId(), EnumMessageType.SINGLE_DEST, null);
+		GoldmanSachs.onMessage(message);
+		// On aimerait le idAccount
+		if (GoldmanSachs.getResultForMessage(messageId).size() == 1) {
+			System.out.println("Résultat: " + GoldmanSachs.getResultForMessage(messageId).get(0));
+		}
+		messageId++;
+		
+/*		
 		if (reponse.equals("oui")) {
 			System.out.println("Nom : ");
 			String name = scanner.nextLine();
@@ -131,7 +156,7 @@ public class Main {
 			
 		} else {
 			
-		}
+		}*/
 		
 		
 	}

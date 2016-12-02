@@ -52,5 +52,7 @@ public interface IMessage<ResultType extends Serializable, NodeType> extends Ser
 	 * @return the message type
 	 */
 	EnumMessageType getMessageType();
+	
+	IResult<Serializable> getResult();
 
 }

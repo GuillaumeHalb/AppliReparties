@@ -69,6 +69,7 @@ public class Message implements IBankMessage {
 		return this.messageType;
 	}
 	
+	@Override
 	public IResult<Serializable> getResult() {
 		return this.result;
 	}

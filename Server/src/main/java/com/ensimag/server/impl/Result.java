@@ -1,19 +1,25 @@
 package com.ensimag.server.impl;
 
+import java.io.Serializable;
+
 import com.ensimag.services.message.IResult;
 
-public class Result implements IResult<T> {
+public class Result<T> implements IResult {
 
-	private T data;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4893360019532742705L;
+	private Serializable data;
 	private long messageId;
 	
-	public Result(T data, long messageId) {
+	public Result(Serializable data, long messageId) {
 		this.data = data;
 		this.messageId = messageId;
 	}
 	
 	@Override
-	public T getData() {
+	public Serializable getData() {
 		return this.data;
 	}
 

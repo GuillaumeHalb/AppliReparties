@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.ensimag.services.bank.IBankAction;
 import com.ensimag.services.bank.IBankNode;
 
-public class addAmount implements IBankAction {
+public class AddAmount implements IBankAction {
 
 	/**
 	 * 
@@ -14,7 +14,7 @@ public class addAmount implements IBankAction {
 
 	private long accountNumber;
 	private int amount;
-	public addAmount(long accountNumber, int amount) {
+	public AddAmount(long accountNumber, int amount) {
 		this.accountNumber = accountNumber;
 		this.amount = amount;
 	}

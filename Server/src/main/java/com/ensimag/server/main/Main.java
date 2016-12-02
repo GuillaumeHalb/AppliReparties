@@ -48,10 +48,10 @@ public class Main {
 		{
 			try {
 					Registry registry = LocateRegistry.createRegistry(1099);
-					User user = new User("Premier","Client",20);
-					String url = "TestRMI";
-					System.out.println("Enregistrement de l'objet avec le nom : " + url);
-					registry.rebind(url, user);
+					User user = new User("Lebit","Benji",23);
+					String client = "client";
+					System.out.println("Enregistrement de l'objet avec le nom : " + client);
+					registry.rebind(client, user);
 					System.out.println("Serveur lancé");
 				} catch (RemoteException e) {
 					e.printStackTrace();
