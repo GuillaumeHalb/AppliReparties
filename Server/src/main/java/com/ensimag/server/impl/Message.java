@@ -1,13 +1,17 @@
 package com.ensimag.server.impl;
+import java.io.Serializable;
+
 import com.ensimag.services.bank.IBankAction;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.message.EnumMessageType;
+import com.ensimag.services.message.IResult;
 
 public class Message implements IBankMessage {
 
 	private static final long serialVersionUID = 2481989767948951546L;
 	
 	private IBankAction action;
+	private IResult<Serializable> result;
 	private long messageId;
 	private long originalBankSenderId;
 	private long senderId;
@@ -15,7 +19,8 @@ public class Message implements IBankMessage {
 	private EnumMessageType messageType;
 	
 	public Message(IBankAction action, long messageId, long originalBankSenderId,
-			long destinationBankId, EnumMessageType messageType) {
+			long destinationBankId, EnumMessageType messageType, IResult<Serializable> result) {
+		this.result = result;
 		this.action = action;
 		this.messageId = messageId;
 		this.originalBankSenderId = originalBankSenderId;
@@ -56,11 +61,15 @@ public class Message implements IBankMessage {
 
 	@Override
 	public IBankMessage clone() { 
-		return new Message(action, messageId, originalBankSenderId, destinationBankId, messageType);
+		return new Message(action, messageId, originalBankSenderId, destinationBankId, messageType, result);
 	}
 
 	@Override
 	public EnumMessageType getMessageType() {
 		return this.messageType;
+	}
+	
+	public IResult<Serializable> getResult() {
+		return this.result;
 	}
 }
