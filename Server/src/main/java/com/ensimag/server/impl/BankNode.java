@@ -147,6 +147,11 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			Ack ack = new Ack(this.id, message.getMessageId());
 			getSender(message).onAck(ack);
 			// On récupère le résultat
+			//TODO: initialiser waitingResults
+			if (this.waitingResults.get(message.getMessageId()) == null) {
+				LinkedList<IResult<? extends Serializable>> listWaitingResults = this.waitingResults.get(message.getMessageId());
+				listWaitingResults = new LinkedList<>();
+			}
 			this.waitingResults.get(message.getMessageId()).add(message.getResult());
 		} else {
 			// Noeud non puit et message non déjà vu
@@ -157,6 +162,16 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				for (IBankNode neighboor : this.neighboors) {
 					if (!(message.getSenderId() == neighboor.getId())) {
 						List<Long> listWaitedAck = this.waitS.get(message.getMessageId());
+						if (listWaitedAck == null) {
+							listWaitedAck = new LinkedList<Long>();
+							System.out.println("listWaitedAck null");
+						} if (neighboor == null) {
+							System.out.println("neighboor null. Comment est-ce possible ?");
+						} if (neighboor.getId() == 0) {
+							System.out.println("neighboor.getId() null " + neighboor.toString());
+						}
+						System.out.println("listWaitedAck: " + listWaitedAck.toString());
+						System.out.println("neighboor: " + neighboor.toString());
 						listWaitedAck.add(neighboor.getId());
 						// TODO: check if this.waitS a bien été rempli.
 						// Sinon, cloner neighboor ou remplacer la liste à
@@ -211,6 +226,9 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		System.out.println("BankNode onAck listAckWaited avant suppression du nouveau ack : "
 				+ this.waitS.get(ack.getAckMessageId()));
 		List<Long> listAckWaited = this.waitS.get(ack.getAckMessageId());
+		if (listAckWaited == null) { // Premier ack
+			listAckWaited = new LinkedList<Long>();
+		}
 		boolean removed = false;
 		for (int i = 0; i < listAckWaited.size(); i++) {
 			if (listAckWaited.get(i) == ack.getAckSenderId()) {
@@ -226,7 +244,8 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		System.out.println("BankNode onAck listAckWaited après suppression du nouveau ack : "
 				+ this.waitS.get(ack.getAckMessageId()));
 		if (listAckWaited.size() == 0) {
-			if (this.up.get(ack.getAckMessageId()) != 0) {
+			// Si on n'est pas à l'envoyeur initial
+			if (this.up.get(ack.getAckMessageId()) != null ) {
 				boolean neighboorFound = false;
 				for (IBankNode neighboor : this.neighboors) {
 					if (neighboor.getId() == this.up.get(ack.getAckMessageId())) {
