@@ -10,6 +10,8 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import com.ensimag.server.impl.AddAccount;
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
@@ -89,8 +91,11 @@ public class Main {
 		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), JPMorgan.getId(), EnumMessageType.SINGLE_DEST, null);
 		GoldmanSachs.onMessage(message);
 		// On aimerait le idAccount
-		if (GoldmanSachs.getResultForMessage(messageId).size() == 1) {
-			System.out.println("Résultat: " + GoldmanSachs.getResultForMessage(messageId).get(0));
+		try {
+			System.out.println("solde : " + JPMorgan.getAccount(1).getTotal());
+			System.out.println("compte ouvert");
+		} catch (AccountNotFoundException e) {
+			e.printStackTrace();
 		}
 		messageId++;
 		

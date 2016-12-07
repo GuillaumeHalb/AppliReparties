@@ -2,7 +2,9 @@ package com.ensimag.server.impl;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
 
@@ -14,17 +16,17 @@ public class Bank implements IBank {
 	
 	private String bankName;
 	private int bankID;
-	private List<IAccount> accountList;
+	private Map<Long,IAccount> accountList;
 
 	public Bank(int bankID, String bankName) {
 		super();
 		this.bankID = bankID;
-		this.accountList = new ArrayList<IAccount>();
+		this.accountList = new HashMap<Long,IAccount>();
 		this.setBankName(bankName);
 	}
 
 
-	public Bank(int bankID, List<IAccount> accountList, String bankName) {
+	public Bank(int bankID, HashMap<Long,IAccount> accountList, String bankName) {
 		super();
 		this.bankID = bankID;
 		this.accountList = accountList;
@@ -38,7 +40,7 @@ public class Bank implements IBank {
 			throw new RemoteException();
 		}
 		
-		return this.accountList;
+		return (List) this.accountList.values();
 	}
 
 	@Override
@@ -49,8 +51,7 @@ public class Bank implements IBank {
 		
 		try
 		{
-			//Pq doit on le caster en int ?
-			return this.accountList.get((int) number);
+			return this.getAccount(number);
 		}
 		catch(Exception e)
 		{
@@ -63,9 +64,9 @@ public class Bank implements IBank {
 		if(accountList == null){
 			throw new RemoteException();
 		}
-		
-		IAccount account = new Account(user);
-		this.accountList.add(account);
+		IAccount account = new Account(user,this.accountList.size()+1,0);
+		System.out.println("account number : " + account.getAccountNumber());
+		this.accountList.put((long) (this.accountList.size()+1),account);
 		return account;
 	}
 
@@ -76,10 +77,10 @@ public class Bank implements IBank {
 		}
 		
 		IAccount accountToClose = getAccount(number);
-		if (this.accountList.remove(accountToClose)) {
+		if (this.accountList.remove(accountToClose.getAccountNumber(), accountToClose)) {
 			return true;
 		} else {
-			if (!this.accountList.contains(accountToClose)) {
+			if (!this.accountList.remove(accountToClose.getAccountNumber(), accountToClose)) {
 				throw new AccountNotFoundException("Account not in this bank");
 			}
 		}

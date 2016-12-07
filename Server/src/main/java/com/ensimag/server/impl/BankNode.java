@@ -40,7 +40,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	// boolean déjà_vu
 	// Si IBankMessage appartient à la liste, on a déjà reçu le message (boolean
 	// = true)
-	private Set<IBankMessage> deja_vu;
+	private Set<Long> deja_vu;
 
 	// Message idMessage dont on attend n resultats
 	private Map<Long, LinkedList<IResult<? extends Serializable>>> waitingResults;
@@ -52,7 +52,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		this.neighboors = new LinkedList<IBankNode>();
 		this.waitS = new HashMap<Long, List<Long>>();
 		this.up = new HashMap<IBankMessage, Long>();
-		this.deja_vu = new HashSet<IBankMessage>();
+		this.deja_vu = new HashSet<Long>();
 		this.waitingResults = new HashMap<Long, LinkedList<IResult<? extends Serializable>>>();
 	}
 
@@ -117,7 +117,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	 */
 	private IResult<Serializable> executeAction(IBankMessage message) {
 		System.out.println("Execution du message");
-		if (this.deja_vu.add(message)) {
+		if (!this.deja_vu.add(message.getMessageId())) {
 			// On execute l'action
 			Serializable data = null;
 			try {
@@ -160,14 +160,19 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 
 		try {
 			for (IBankNode neighboor : this.neighboors) {
-				if (!(message.getSenderId() == neighboor.getId())) {
+				if (message.getSenderId() != neighboor.getId()) {
 					listWaitedAck.add(neighboor.getId());
+					System.out.println("noeud " + neighboor.getId() + "ajouté à listwaitAck");
+				}
+			}
+			this.waitS.put(message.getMessageId(), listWaitedAck);
+			for (IBankNode neighboor : this.neighboors) {
+				if (message.getSenderId() != neighboor.getId()) {
 					IBankMessage messageCloned = message.clone();
 					messageCloned.setSenderId(this.id);
 					neighboor.onMessage(messageCloned);
 				}
 			}
-			this.waitS.put(message.getMessageId(), listWaitedAck);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -207,7 +212,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}
 
 		// On a déjà vu le message
-		if (!this.deja_vu.add(message)) {
+		if (!this.deja_vu.add(message.getMessageId())) {
 			System.out.println("deja vu");
 			sendAckForMessage(message);
 			return;
@@ -353,11 +358,11 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}
 
 		long destinationBankId = -1;
-		for (IBankMessage message : this.deja_vu) {
-			if (message.getMessageId() == result.getMessageId()) {
-				destinationBankId = message.getOriginalBankSenderId();
-			}
-		}
+		//for (IBankMessage message : this.deja_vu) {
+		//	if (message.getMessageId() == result.getMessageId()) {
+		//		destinationBankId = message.getOriginalBankSenderId();
+		//	}
+		//}
 
 		if (destinationBankId == -1) {
 			System.out.println("ERREUR BankNode DeliverResult : lors de l'initialisation de la destination");

@@ -1,6 +1,7 @@
 package com.ensimag.services.bank;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 public interface IAccount extends Serializable {
 

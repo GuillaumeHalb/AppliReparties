@@ -1,10 +1,13 @@
 package com.ensimag.server.impl;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
 import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IUser;
 import com.ensimag.services.bank.NotEnoughMoneyException;
 
-public class Account implements IAccount {
+public class Account extends UnicastRemoteObject implements IAccount {
 
 	private static final long serialVersionUID = 1412244524309258892L;
 	
@@ -13,18 +16,12 @@ public class Account implements IAccount {
 	private int balance;
 	private int overdraw;
 	
-	public Account(IUser user, int number, int balance) {
+	public Account(IUser user, int number, int balance) throws RemoteException{
+		super();
 		this.user = user;
 		this.number = number;
 		this.balance = balance;
 		this.overdraw = 0;
-	}
-	
-	public Account(IUser user2)
-	{
-		this.user = user2;
-		//TODO number
-		this.balance = 0;
 	}
 	
 	@Override
