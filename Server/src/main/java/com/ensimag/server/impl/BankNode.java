@@ -115,7 +115,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	/**
 	 * Execute l'action et envoie le résultat
 	 */
-	private IResult executeAction(IBankMessage message) {
+	private IResult<Serializable> executeAction(IBankMessage message) {
 		System.out.println("Execution du message");
 		if (this.deja_vu.add(message)) {
 			// On execute l'action
@@ -126,7 +126,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				e.printStackTrace();
 			}
 
-			IResult result = new Result(data, message.getMessageId());
+			IResult<Serializable> result = new Result(data, message.getMessageId());
 			return result;
 		} else {
 			System.out.println("executeAction normalement pas là");
@@ -139,12 +139,11 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	 */
 	private void sendAckForMessage(IBankMessage message) {
 		System.out.println("Send ack for message " + message.getMessageId());
-		Ack ack;
 		try {
-			ack = new Ack(this.getId(), message.getMessageId());
+			Ack ack = new Ack(this.getId(), message.getMessageId());
+			System.out.println("messageID " + message.getMessageId() + " ack id " + ack.getAckMessageId());
 			getSender(message).onAck(ack);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -168,9 +167,27 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 					neighboor.onMessage(messageCloned);
 				}
 			}
+			this.waitS.put(message.getMessageId(), listWaitedAck);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	// TODO: On pourrait envoyer returnMessage que à up
+	private void sendResult(IBankMessage message, IResult<Serializable> result) {
+		IBankMessage resultMessage = new Message(null, message.getMessageId(), this.id, message.getOriginalBankSenderId(),
+				EnumMessageType.DELIVERY, result);
+		
+		followMessage(resultMessage);
+	}
+
+	private void stockResult(IBankMessage message) {
+		LinkedList<IResult<? extends Serializable>> resultList = this.waitingResults.get(message.getMessageId());
+		if (resultList == null) {
+			resultList = new LinkedList<>();
+		}
+		resultList.add(message.getResult());
+		this.waitingResults.put(message.getMessageId(), resultList);
 	}
 
 	/**
@@ -205,17 +222,15 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 					|| message.getMessageType().equals(EnumMessageType.BROADCAST)) {
 				System.out.println("\t Single Dest ou Broadcast");
 				IResult<Serializable> result = this.executeAction(message);
-				try {
-					this.deliverResult(result);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
+				sendResult(message, result);
+				return;
 			} else if (message.getMessageType().equals(EnumMessageType.DELIVERY)) {
 				System.out.println("\t Delivery");
 				if (message.getDestinationBankId() == this.id) {
 					System.out.println("\t \t Pour nous");
 					sendAckForMessage(message);
-					this.getResultForMessage(message.getMessageId());
+					stockResult(message);
+					// this.getResultForMessage(message.getMessageId());
 				} else {
 					System.out.println("\t Noeud puit onMessage : On ne doit pas être là");
 				}
@@ -229,7 +244,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			if (message.getMessageType().equals(EnumMessageType.BROADCAST)) {
 				System.out.println("\t Broadcast");
 				IResult<Serializable> result = executeAction(message);
-				deliverResult(result);
+				sendResult(message, result);
 				followMessage(message);
 				return;
 			} else if (message.getMessageType().equals(EnumMessageType.SINGLE_DEST)
@@ -237,13 +252,14 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				System.out.println("\t juste pour nous");
 				sendAckForMessage(message);
 				IResult<Serializable> result = executeAction(message);
-				deliverResult(result);
+				sendResult(message, result);
 				return;
 			} else if (message.getMessageType().equals(EnumMessageType.DELIVERY)
 					&& message.getDestinationBankId() == this.id) {
 				System.out.println("\t Delivery");
 				sendAckForMessage(message);
-				this.getResultForMessage(message.getMessageId());
+				stockResult(message);
+				// this.getResultForMessage(message.getMessageId());
 				return;
 			} else {
 				followMessage(message);
@@ -265,13 +281,6 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		return sender;
 	}
 
-	private boolean alreadySeen(IBankMessage message) {
-		if (this.deja_vu.contains(message)) {
-			return true;
-		}
-		return false;
-	}
-
 	// Returns true if this node is a well
 	private boolean isWellNode() {
 		if (this.neighboors.size() == 1) {
@@ -283,50 +292,30 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	@Override
 	public void onAck(IAck ack) throws RemoteException {
 		System.out.println("onAck " + ack.getAckMessageId());
-		if (this.id < 0) {
-			throw new RemoteException();
-		}
-		System.out.println("BankNode onAck listAckWaited avant suppression du nouveau ack : "
-				+ this.waitS.get(ack.getAckMessageId()));
 
 		List<Long> listAckWaited = this.waitS.get(ack.getAckMessageId());
-		if (listAckWaited == null) { // Premier ack
-			// listAckWaited = new LinkedList<Long>();
-			System.out.println("on Ack: pas normal d'être ici");
+		if (listAckWaited == null) {
+			System.out.println("***** on Ack: pas normal d'être ici *****");
 			return;
 		}
-		boolean removed = false;
 		for (int i = 0; i < listAckWaited.size(); i++) {
 			if (listAckWaited.get(i) == ack.getAckSenderId()) {
+				System.out.println("\t Noeud " + this.getId() + " On supprime le ack attendu du noeud " + ack.getAckSenderId());
 				listAckWaited.remove(i);
-				removed = true;
 			}
 		}
-		if (!removed) {
-			System.out.println(
-					"PB: BankNode onAck: no element deleted. Didn't expected ack from " + ack.getAckSenderId());
-			return;
-		}
-		// Expected : un élément en moins.
-		System.out.println("BankNode onAck listAckWaited après suppression du nouveau ack : "
-				+ this.waitS.get(ack.getAckMessageId()));
 
 		if (listAckWaited.size() == 0) {
 			// Si on n'est pas à l'envoyeur initial
 			if (this.up.get(ack.getAckMessageId()) != null) {
-				boolean neighboorFound = false;
 				for (IBankNode neighboor : this.neighboors) {
 					if (neighboor.getId() == this.up.get(ack.getAckMessageId())) {
 						neighboor.onAck(ack);
-						neighboorFound = true;
 					}
 				}
-				if (!neighboorFound) {
-					System.out.println("PB: BankNode onAck: neighboor not found to send ack.");
-					return;
-				}
-			} else { // On est revenu au premier envoyeur : fin de la vague
-				System.out.println("Ack back to primary sender : OK");
+			// On est revenu au premier envoyeur : fin de la vague
+			} else { 
+				System.out.println("\t Ack back to primary sender : OK");
 			}
 		}
 	}
@@ -338,11 +327,6 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	 *            the message id for which a result is waited
 	 * @return the result of the sent message
 	 */
-	// Si le message était un SINGLE_DEST on attend qu'un seul result (liste
-	// avec un seul élément)
-	// Si le message était un BROADCAST on attend une liste avec un résultat par
-	// noeud
-	// Sinon pas de résultat attend.
 	@Override
 	public List<IResult<? extends Serializable>> getResultForMessage(long messageId) throws RemoteException {
 		if (this.id < 0) {
@@ -368,17 +352,18 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			throw new RemoteException();
 		}
 
-				
 		long destinationBankId = -1;
 		for (IBankMessage message : this.deja_vu) {
 			if (message.getMessageId() == result.getMessageId()) {
 				destinationBankId = message.getOriginalBankSenderId();
 			}
 		}
+
 		if (destinationBankId == -1) {
 			System.out.println("ERREUR BankNode DeliverResult : lors de l'initialisation de la destination");
 			return false;
 		}
+
 		Message messageRetour = new Message(null, result.getMessageId(), this.getId(), destinationBankId,
 				EnumMessageType.DELIVERY, result);
 
