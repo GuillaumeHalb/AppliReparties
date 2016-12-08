@@ -346,7 +346,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				listAckWaited.remove(i);
 			}
 		}
-
+		
 		if (listAckWaited.size() == 0) {
 			// Si on n'est pas à l'envoyeur initial
 			// System.out.println("up: " + up.toString());
