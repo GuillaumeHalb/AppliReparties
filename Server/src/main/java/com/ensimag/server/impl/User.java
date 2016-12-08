@@ -11,9 +11,7 @@ public class User extends UnicastRemoteObject implements IUser {
 	
 	private String name;
 	private String firstName;
-	private int age;
-
-	
+	private int age;	
 	
 	public User(String name, String firstName, int age) throws RemoteException {
 		super();
@@ -36,5 +34,4 @@ public class User extends UnicastRemoteObject implements IUser {
 	public String getAge() {
 		return Integer.toString(age);
 	}
-
 }

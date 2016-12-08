@@ -20,5 +20,4 @@ public interface IUser extends Serializable, Remote {
 	 * @return the age
 	 */
 	String getAge() throws RemoteException;
-
 }

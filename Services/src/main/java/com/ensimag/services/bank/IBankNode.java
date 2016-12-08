@@ -18,4 +18,6 @@ public interface IBankNode extends IBankOperations, INode<IBankMessage> {
 	String getBankName() throws RemoteException;
 	
 	List<IBankNode> getNeighboors() throws RemoteException;
+	
+	IBankNode clone() throws RemoteException;
 }

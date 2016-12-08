@@ -1,19 +1,20 @@
 package com.ensimag.services.bank;
 
 import java.io.Serializable;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-public interface IAccount extends Serializable {
+public interface IAccount extends Serializable, Remote {
 
 	/**
 	 * @return the account user
 	 */
-	IUser getAccountUser();
+	IUser getAccountUser() throws RemoteException;
 
 	/**
 	 * @return the account number
 	 */
-	long getAccountNumber();
+	long getAccountNumber() throws RemoteException;
 
 	/**
 	 * Add the amount of cash to the account
@@ -22,7 +23,7 @@ public interface IAccount extends Serializable {
 	 *            the amount to add
 	 * @return the new cash amount
 	 */
-	int add(int amount);
+	int add(int amount) throws RemoteException;
 
 	/**
 	 * Remove the amount on the account
@@ -34,12 +35,12 @@ public interface IAccount extends Serializable {
 	 *             if there is not enough money to remove the amount of money,
 	 *             overdraw included
 	 */
-	int remove(int amount) throws NotEnoughMoneyException;
+	int remove(int amount) throws NotEnoughMoneyException, RemoteException;
 
 	/**
 	 * @return the total of available money on the account
 	 */
-	int getTotal();
+	int getTotal() throws RemoteException;
 
 	/**
 	 * Set the overdraw for the account
@@ -48,5 +49,5 @@ public interface IAccount extends Serializable {
 	 *            the overdraw to set
 	 * @return the set overdraw
 	 */
-	int setAllowedOverdraw(int overdraw);
+	int setAllowedOverdraw(int overdraw) throws RemoteException;
 }

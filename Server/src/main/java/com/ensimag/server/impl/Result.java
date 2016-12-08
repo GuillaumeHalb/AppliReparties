@@ -27,5 +27,4 @@ public class Result<T> implements IResult {
 	public long getMessageId() {
 		return this.messageId;
 	}
-
 }

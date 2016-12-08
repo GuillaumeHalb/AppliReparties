@@ -8,15 +8,18 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.security.auth.login.AccountNotFoundException;
 
+import com.ensimag.server.impl.Account;
 import com.ensimag.server.impl.AddAccount;
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 import com.ensimag.server.impl.Message;
 import com.ensimag.server.impl.User;
+import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IBankAction;
 import com.ensimag.services.bank.IBankMessage;
 import com.ensimag.services.bank.IBankNode;
@@ -91,11 +94,8 @@ public class Main {
 		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), JPMorgan.getId(), EnumMessageType.SINGLE_DEST, null);
 		GoldmanSachs.onMessage(message);
 		// On aimerait le idAccount
-		try {
-			System.out.println("solde : " + JPMorgan.getAccount(1).getTotal());
-			System.out.println("compte ouvert");
-		} catch (AccountNotFoundException e) {
-			e.printStackTrace();
+		List<IResult<? extends Serializable>> list = GoldmanSachs.getResultForMessage(messageId);
+		for (IResult<? extends Serializable> result : list) {
 		}
 		messageId++;
 		

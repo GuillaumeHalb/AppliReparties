@@ -19,7 +19,6 @@ import com.ensimag.services.bank.IBankNode;
 import com.ensimag.services.bank.IUser;
 import com.ensimag.services.message.EnumMessageType;
 import com.ensimag.services.message.IAck;
-import com.ensimag.services.message.IMessage;
 import com.ensimag.services.message.IResult;
 import com.ensimag.services.node.INode;
 
@@ -124,6 +123,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			Serializable data = null;
 			try {
 				data = message.getAction().execute(this);
+				System.out.println("data: " + data.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -140,7 +140,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	 * Envoie un ack
 	 */
 	private void sendAckForMessage(IBankMessage message) {
-		System.out.println("\t \t SendAckForMessage " + message.toString() + " to node " + message.getSenderId());
+		System.out.println("\t SendAckForMessage " + message.toString() + " to node " + message.getSenderId());
 		try {
 			Ack ack = new Ack(this.getId(), message.getMessageId());
 			getSender(message).onAck(ack);

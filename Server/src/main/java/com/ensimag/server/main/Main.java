@@ -18,7 +18,7 @@ public class Main {
 	private void start(String BankName, int BankId) {
 		try {
 			Registry registry = LocateRegistry.getRegistry(1099);
-			BankNode bank = new BankNode(new Bank(BankId,BankName),BankId);
+			BankNode bank = new BankNode(new Bank(BankId, BankName), BankId);
 			registry.rebind(BankName, bank);
 			System.out.println("Bank " + BankName + "," + BankId + " initialized");
 			
@@ -48,7 +48,7 @@ public class Main {
 		{
 			try {
 					Registry registry = LocateRegistry.createRegistry(1099);
-					User user = new User("Lebit","Benji",23);
+					User user = new User("Lebit", "Benji", 23);
 					String client = "client";
 					System.out.println("Enregistrement de l'objet avec le nom : " + client);
 					registry.rebind(client, user);

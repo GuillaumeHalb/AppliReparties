@@ -65,7 +65,6 @@ public class Bank implements IBank {
 			throw new RemoteException();
 		}
 		IAccount account = new Account(user,this.accountList.size()+1,0);
-		System.out.println("account number : " + account.getAccountNumber());
 		this.accountList.put((long) (this.accountList.size()+1),account);
 		return account;
 	}
