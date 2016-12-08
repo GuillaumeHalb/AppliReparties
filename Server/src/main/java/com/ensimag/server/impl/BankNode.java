@@ -358,6 +358,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 						neighboor.onAck(ackSuivant);
 					}
 				}
+				//Faire un clone de neighboor et supprimer avant le onAck (implementer clone dans IBankNode)
 				this.up.remove(ack.getAckMessageId()); // On l'enleve de la
 														// liste pour laisser
 														// place à la reponse
@@ -457,5 +458,15 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	@Override
 	public String getBankName() throws RemoteException {
 		return bank.getBankName();
+	}
+	
+	@Override
+	public IBankNode clone() {
+		try {
+			return new BankNode(this.bank,this.id);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }
