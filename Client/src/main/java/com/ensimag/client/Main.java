@@ -91,7 +91,7 @@ public class Main {
 		IUser client = (IUser) Naming.lookup("rmi://localhost/client");
 		//IUser client = new User("Lebit", "Benj", 23);
 		IBankAction action = new AddAccount(client);
-		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), JPMorgan.getId(), EnumMessageType.SINGLE_DEST, null);
+		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), Citi.getId(), EnumMessageType.SINGLE_DEST, null);
 		GoldmanSachs.onMessage(message);
 		// On aimerait le idAccount
 		List<IResult<? extends Serializable>> list = GoldmanSachs.getResultForMessage(messageId);

@@ -123,7 +123,6 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			Serializable data = null;
 			try {
 				data = message.getAction().execute(this);
-				System.out.println("data: " + data.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -185,6 +184,10 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		IBankMessage resultMessage = new Message(null, message.getMessageId(), this.id,
 				message.getOriginalBankSenderId(), EnumMessageType.DELIVERY, result);
 
+		if (this.up.get(message.getMessageId()) != null) {
+			this.up.remove(message.getMessageId());
+		}
+		
 		List<Long> listWaitedAck = this.waitS.get(message.getMessageId());
 		if (listWaitedAck == null) {
 			listWaitedAck = new LinkedList<Long>();
@@ -201,6 +204,11 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	private void stockResult(IBankMessage message) {
 		System.out.println("stockResult " + message.toString());
 		LinkedList<IResult<? extends Serializable>> resultList = this.waitingResults.get(message.getMessageId());
+		
+		if (this.up.get(message.getMessageId()) != null) {
+			this.up.remove(message.getMessageId());
+		}
+		
 		if (resultList == null) {
 			resultList = new LinkedList<>();
 		}
@@ -359,7 +367,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 					}
 				}
 				//Faire un clone de neighboor et supprimer avant le onAck (implementer clone dans IBankNode)
-				this.up.remove(ack.getAckMessageId()); // On l'enleve de la
+				//this.up.remove(ack.getAckMessageId()); // On l'enleve de la
 														// liste pour laisser
 														// place à la reponse
 														// (meme id)
