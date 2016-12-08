@@ -73,4 +73,9 @@ public class Message implements IBankMessage {
 	public IResult<Serializable> getResult() {
 		return this.result;
 	}
+	
+	@Override
+	public String toString() {
+		return "message id: " +this.getMessageId() + ", message type: " + this.getMessageType() + ", sender: " + this.getSenderId() +", original sender: " + this.getOriginalBankSenderId();  
+	}
 }
