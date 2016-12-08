@@ -1,4 +1,5 @@
 package com.ensimag.server.impl;
+
 import java.io.Serializable;
 
 import com.ensimag.services.bank.IBankAction;
@@ -9,7 +10,7 @@ import com.ensimag.services.message.IResult;
 public class Message implements IBankMessage {
 
 	private static final long serialVersionUID = 2481989767948951546L;
-	
+
 	private IBankAction action;
 	private IResult<Serializable> result;
 	private long messageId;
@@ -17,9 +18,9 @@ public class Message implements IBankMessage {
 	private long senderId;
 	private long destinationBankId;
 	private EnumMessageType messageType;
-	
-	public Message(IBankAction action, long messageId, long originalBankSenderId,
-			long destinationBankId, EnumMessageType messageType, IResult<Serializable> result) {
+
+	public Message(IBankAction action, long messageId, long originalBankSenderId, long destinationBankId,
+			EnumMessageType messageType, IResult<Serializable> result) {
 		this.result = result;
 		this.action = action;
 		this.messageId = messageId;
@@ -28,7 +29,7 @@ public class Message implements IBankMessage {
 		this.destinationBankId = destinationBankId;
 		this.messageType = messageType;
 	}
-	
+
 	@Override
 	public long getMessageId() {
 		return this.messageId;
@@ -40,7 +41,7 @@ public class Message implements IBankMessage {
 	}
 
 	@Override
-	public long getOriginalBankSenderId() {		
+	public long getOriginalBankSenderId() {
 		return this.originalBankSenderId;
 	}
 
@@ -60,7 +61,7 @@ public class Message implements IBankMessage {
 	}
 
 	@Override
-	public IBankMessage clone() { 
+	public IBankMessage clone() {
 		return new Message(action, messageId, originalBankSenderId, destinationBankId, messageType, result);
 	}
 
@@ -68,14 +69,24 @@ public class Message implements IBankMessage {
 	public EnumMessageType getMessageType() {
 		return this.messageType;
 	}
-	
+
 	@Override
 	public IResult<Serializable> getResult() {
 		return this.result;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "message id: " +this.getMessageId() + ", message type: " + this.getMessageType() + ", sender: " + this.getSenderId() +", original sender: " + this.getOriginalBankSenderId();  
+		return "message id: " + this.getMessageId() + ", message type: " + this.getMessageType() + ", sender: "
+				+ this.getSenderId() + ", original sender: " + this.getOriginalBankSenderId();
+	}
+
+	@Override
+	public boolean equals(Object message3) {
+		Message message2 = (Message) message3;
+		if (this.getMessageId() == message2.getMessageId() && this.getMessageType() == message2.getMessageType()) {
+			return true;
+		}
+		return false;
 	}
 }
