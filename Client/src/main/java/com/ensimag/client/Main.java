@@ -58,20 +58,20 @@ public class Main {
 		IBankNode DeutscheBank = (IBankNode) Naming.lookup("rmi://localhost/Deutsche_Bank");
 		bankNodeList.add(DeutscheBank);
 
-		try {
-			for (IBankNode bank : bankNodeList) {
-				System.out.println("Name : " + bank.getBankName());
-				System.out.println("Id : " + bank.getId());
-				System.out.println("\t Neighboors :");
-				for (IBankNode neighboor : bank.getNeighboors()) {
-					System.out.println("\t Name : " + neighboor.getBankName());
-					System.out.println("\t Id : " + neighboor.getId());
-
-				}
-			}
-		} catch (Exception e) {
-			System.err.println(e);
-		}
+//		try {
+//			for (IBankNode bank : bankNodeList) {
+//				System.out.println("Name : " + bank.getBankName());
+//				System.out.println("Id : " + bank.getId());
+//				System.out.println("\t Neighboors :");
+//				for (IBankNode neighboor : bank.getNeighboors()) {
+//					System.out.println("\t Name : " + neighboor.getBankName());
+//					System.out.println("\t Id : " + neighboor.getId());
+//
+//				}
+//			}
+//		} catch (Exception e) {
+//			System.err.println(e);
+//		}
 
 		// On n'enregistre pas les clients pour le moment
 /*
@@ -94,9 +94,6 @@ public class Main {
 		IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), Citi.getId(), EnumMessageType.SINGLE_DEST, null);
 		GoldmanSachs.onMessage(message);
 		// On aimerait le idAccount
-		List<IResult<? extends Serializable>> list = GoldmanSachs.getResultForMessage(messageId);
-		for (IResult<? extends Serializable> result : list) {
-		}
 		messageId++;
 		
 /*		
