@@ -116,13 +116,14 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 
 	/**
 	 * Execute l'action et envoie le résultat
+	 * @throws Exception 
 	 */
-	private IResult<Serializable> executeAction(IBankMessage message) {
+	private IResult<Serializable> executeAction(IBankMessage message) throws Exception {
 		// On execute l'action
 		Serializable data = null;
 		try {
 			data = message.getAction().execute(this);
-		} catch (Exception e) {
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 
@@ -142,21 +143,24 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}
 	}
 
-	private void followMessage(IBankMessage message) {
+	private void followMessage(IBankMessage message) throws Exception {
 		List<Long> listWaitedAck = this.waitS.get(message.getMessageId());
 		if (listWaitedAck == null) {
 			listWaitedAck = new LinkedList<Long>();
 		}
-
+		int runningNeighboors = 0;
 		for (IBankNode neighboor : this.neighboors) {
 			try {
 				if (message.getSenderId() != neighboor.getId()) {
 					listWaitedAck.add(neighboor.getId());
+					runningNeighboors++;
 				}
 			} catch (Exception e) {
 
 			}
 		}
+		if (runningNeighboors == 0)
+			throw new Exception("Noeud isolé ! \n Requête impossible");
 		this.waitS.put(message.getMessageId(), listWaitedAck);
 		for (IBankNode neighboor : this.neighboors) {
 			try {
@@ -172,7 +176,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	}
 
 	// Send result only to the message sender
-	private void sendResult(IBankMessage message, IResult<Serializable> result) {
+	private void sendResult(IBankMessage message, IResult<Serializable> result) throws Exception {
 		IBankMessage resultMessage = new Message(null, message.getMessageId(), this.id,
 				message.getOriginalBankSenderId(), EnumMessageType.DELIVERY, result);
 
@@ -222,10 +226,10 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	 * 
 	 * @param message
 	 *            the message to handle
-	 * @throws RemoteException
+	 * @throws Exception 
 	 */
 	@Override
-	public void onMessage(IBankMessage message) throws RemoteException {
+	public void onMessage(IBankMessage message) throws Exception {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
@@ -290,8 +294,12 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	private IBankNode getSender(IBankMessage message) throws RemoteException {
 		IBankNode sender = null;
 		for (IBankNode neighboor : getNeighboors()) {
-			if (neighboor.getId() == message.getSenderId()) {
-				sender = neighboor;
+			try {
+				if (neighboor.getId() == message.getSenderId()) {
+					sender = neighboor;
+				}
+			} catch (Exception e) {
+
 			}
 		}
 		if (sender == null) {
@@ -388,7 +396,12 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		for (IBankNode neighboor : this.neighboors) {
 			System.out.println("Voisin : " + neighboor.getBankName());
 			// On fait suivre la réponse
-			neighboor.onMessage(messageRetour);
+			try {
+				neighboor.onMessage(messageRetour);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			// On attend des ack pour la réponse
 			liste.add(neighboor.getId());
 		}

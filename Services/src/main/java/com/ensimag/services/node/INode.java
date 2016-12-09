@@ -29,8 +29,9 @@ public interface INode<MessageType> extends Serializable, Remote {
 	 * @param message
 	 *            the message to handle
 	 * @throws RemoteException
+	 * @throws Exception 
 	 */
-	void onMessage(MessageType message) throws RemoteException;
+	void onMessage(MessageType message) throws RemoteException, Exception;
 
 	/**
 	 * Handles the ack of a given message
