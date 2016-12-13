@@ -182,9 +182,10 @@ public class Main {
 
 				boolean bankExists = false;
 				IBankNode bankNode = null;
+				String bankName = null;
 				while (!bankExists) {
 					try {
-						String bankName = scanner.nextLine();
+						bankName = scanner.nextLine();
 						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
 						bankExists = true;
 					} catch (Exception e) {
@@ -203,7 +204,7 @@ public class Main {
 					for (IResult result : resultList) {
 						System.out.println("Resultat: ");
 						System.out.println("Compte numero " + ((IAccount) result.getData()).getAccountNumber()
-								+ " ouvert pour l'utilisateur"
+								+ " ouvert dans la banque " + bankName + " pour l'utilisateur "
 								+ ((IAccount) result.getData()).getAccountUser().getFirstName() + " "
 								+ ((IAccount) result.getData()).getAccountUser().getName() + ", "
 								+ ((IAccount) result.getData()).getAccountUser().getAge() + " ans");
@@ -261,6 +262,7 @@ public class Main {
 				String accountNumber = scanner.nextLine();
 				while (!Main.tryParseInt(accountNumber)) {
 					System.out.println("Saisissez un entier");
+					accountNumber = scanner.nextLine();
 				}
 
 				System.out.println("Quelle banque ?");
@@ -268,9 +270,10 @@ public class Main {
 
 				boolean bankExists = false;
 				IBankNode bankNode = null;
+				String bankName = null;
 				while (!bankExists) {
 					try {
-						String bankName = scanner.nextLine();
+						bankName = scanner.nextLine();
 						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
 						bankExists = true;
 					} catch (Exception e) {
@@ -286,15 +289,20 @@ public class Main {
 					GoldmanSachs.onMessage(message);
 					List<IResult<? extends Serializable>> resultList = GoldmanSachs
 							.getResultForMessage(message.getMessageId());
-										
+
 					for (IResult result : resultList) {
 						System.out.println("Resultat: ");
-						System.out.println("Compte numero " + ((IAccount) result.getData()).getAccountNumber()
-								+ " trouvé \n Utilisateur : "
-								+ ((IAccount) result.getData()).getAccountUser().getFirstName() + " "
-								+ ((IAccount) result.getData()).getAccountUser().getName() + ", "
-								+ ((IAccount) result.getData()).getAccountUser().getAge() + " ans");
-						System.out.println("Solde de " + ((IAccount) result.getData()).getTotal());
+						System.out.println("On est là");
+						if (result.getData() == null) {
+							System.out.println("Aucun compte n°" + accountNumber + " dans la banque " + bankName);
+						} else {
+							System.out.println("Compte numero " + ((IAccount) result.getData()).getAccountNumber()
+									+ " trouvé \n Utilisateur : "
+									+ ((IAccount) result.getData()).getAccountUser().getFirstName() + " "
+									+ ((IAccount) result.getData()).getAccountUser().getName() + ", "
+									+ ((IAccount) result.getData()).getAccountUser().getAge() + " ans");
+							System.out.println("Solde de " + ((IAccount) result.getData()).getTotal());
+						}
 					}
 					messageId++;
 				} catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.ensimag.server.impl;
 
+import com.ensimag.services.message.EnumMessageType;
 import com.ensimag.services.message.IAck;
 
 public class Ack implements IAck {
@@ -8,10 +9,12 @@ public class Ack implements IAck {
 	
 	private long ackSenderId;
 	private long ackMessageId;
+	private EnumMessageType messageType;
 	
-	public Ack(long ackSenderId, long ackMessageId) {
+	public Ack(long ackSenderId, long ackMessageId, EnumMessageType type) {
 		this.ackSenderId = ackSenderId;
 		this.ackMessageId = ackMessageId;
+		this.messageType = type;
 	}
 	
 	@Override
@@ -25,7 +28,12 @@ public class Ack implements IAck {
 	}
 	
 	@Override
+	public EnumMessageType getType() {
+		return this.messageType;
+	}
+	
+	@Override
 	public String toString() {
-		return "sender: " + ackSenderId + " ackId: " + ackMessageId;
+		return "sender: " + ackSenderId + " ackId: " + ackMessageId + ", type " + messageType;
 	}
 }
