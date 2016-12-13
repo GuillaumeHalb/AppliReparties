@@ -16,6 +16,7 @@ import javax.security.auth.login.AccountNotFoundException;
 import com.ensimag.server.impl.Account;
 import com.ensimag.server.impl.AddAccount;
 import com.ensimag.server.impl.AddAmount;
+import com.ensimag.server.impl.AuthorizeOverdraw;
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 import com.ensimag.server.impl.CloseAccount;
@@ -400,7 +401,37 @@ public class Main {
 					System.out.println(e.getMessage());
 				}
 			} else if (actionString.equals("6")) {
+				System.out.println("Quel numéro de compte ?");
+				String accountNumber = scanner.nextLine();
+				while (!Main.tryParseInt(accountNumber)) {
+					System.out.println("Saisissez un entier");
+				}
+				IBankNode bankNode = getBankName(bankNodeList);
 
+				System.out.println("A combien voulez vous autoriser votre découvert ?");
+				String amountForOverdraw = scanner.nextLine();
+				while (!Main.tryParseInt(amountForOverdraw) || Integer.parseInt(amountForOverdraw) < 0) {
+					System.out.println("Saisissez un entier");
+					amountForOverdraw = scanner.nextLine();
+				}
+				IBankAction action = new AuthorizeOverdraw(Long.parseLong(accountNumber), Integer.parseInt(amountForOverdraw));
+				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
+						EnumMessageType.SINGLE_DEST, null);
+
+				Result resultFromRequest = new Result(client, message.getMessageId());
+				try {
+					GoldmanSachs.onMessage(message);
+					List<IResult<? extends Serializable>> resultList = GoldmanSachs
+							.getResultForMessage(message.getMessageId());
+					for (IResult result : resultList) {
+						System.out.println("Le découvert du compte  " + accountNumber + " est maintenant de "
+								+ (int) (result.getData()) + " ,effectuée");
+
+					}
+					messageId++;
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			} else if (actionString.equals("7")) {
 				System.out.println("Sortie du programme...");
 				exit = true;
