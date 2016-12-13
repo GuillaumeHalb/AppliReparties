@@ -38,7 +38,7 @@ public class Account extends UnicastRemoteObject implements IAccount {
 	public int add(int amount) {
 		assert(amount >= 0);
 		this.balance += amount;
-		return 0;
+		return balance;
 	}
 
 	@Override

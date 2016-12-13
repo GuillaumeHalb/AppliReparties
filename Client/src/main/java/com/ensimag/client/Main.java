@@ -15,6 +15,7 @@ import javax.security.auth.login.AccountNotFoundException;
 
 import com.ensimag.server.impl.Account;
 import com.ensimag.server.impl.AddAccount;
+import com.ensimag.server.impl.AddAmount;
 import com.ensimag.server.impl.Bank;
 import com.ensimag.server.impl.BankNode;
 import com.ensimag.server.impl.CloseAccount;
@@ -157,8 +158,8 @@ public class Main {
 			System.out.println("1) ouvrir compte");
 			System.out.println("2) fermer compte");
 			System.out.println("3) consulter compte");
-			System.out.println("4) retirer");
-			System.out.println("5) deposer");
+			System.out.println("4) deposer");
+			System.out.println("5) retirer");
 			System.out.println("6) autoriser découvert");
 			System.out.println("7) sortie");
 			String actionString = scanner.nextLine();
@@ -169,8 +170,8 @@ public class Main {
 				System.out.println("1) ouvrir compte");
 				System.out.println("2) fermer compte");
 				System.out.println("3) consulter compte");
-				System.out.println("4) retirer");
-				System.out.println("5) deposer");
+				System.out.println("4) deposer");
+				System.out.println("5) retirer");
 				System.out.println("6) autoriser découvert");
 				System.out.println("7) sortie");
 				actionString = scanner.nextLine();
@@ -302,7 +303,53 @@ public class Main {
 				}
 
 			} else if (actionString.equals("4")) {
+				System.out.println("Quel numéro de compte ?");
+				String accountNumber = scanner.nextLine();
+				while (!Main.tryParseInt(accountNumber)) {
+					System.out.println("Saisissez un entier");
+				}
 
+				System.out.println("Quelle banque ?");
+				Main.afficherListeBanques(bankNodeList);
+
+				boolean bankExists = false;
+				IBankNode bankNode = null;
+				while (!bankExists) {
+					try {
+						String bankName = scanner.nextLine();
+						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
+						bankExists = true;
+					} catch (Exception e) {
+						System.out.println("La banque spécifiée n'est pas dans la liste");
+						System.out.println("Resaisir un nom de banque : ");
+					}
+				}
+				System.out.println("Combien d'argent voulez vous ajouter");
+				String amountToAdd = scanner.nextLine();
+				while (!Main.tryParseInt(amountToAdd)) {
+					System.out.println("Saisissez un entier");
+					if(Integer.parseInt(amountToAdd) < 0)
+						System.out.println("Saisissez un montant positif");
+					amountToAdd = scanner.nextLine();
+				}
+				IBankAction action = new AddAmount(Long.parseLong(accountNumber),Integer.parseInt(amountToAdd));
+				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
+						EnumMessageType.SINGLE_DEST, null);
+				Result resultFromRequest = new Result(client, message.getMessageId());
+				try {
+					GoldmanSachs.onMessage(message);
+					List<IResult<? extends Serializable>> resultList = GoldmanSachs
+							.getResultForMessage(message.getMessageId());
+										
+					for (IResult result : resultList) {
+						System.out.println("Resultat: ");
+						System.out.println("Le solde du compte " + Long.parseLong(accountNumber)
+								+ " est maintenant de " + (int) result.getData());
+					}
+					messageId++;
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			} else if (actionString.equals("5")) {
 
 			} else if (actionString.equals("6")) {

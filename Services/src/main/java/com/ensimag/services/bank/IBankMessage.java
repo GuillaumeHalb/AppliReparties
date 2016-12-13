@@ -17,4 +17,7 @@ public interface IBankMessage extends IMessage<Serializable, com.ensimag.service
 
 	@Override
 	IBankMessage clone();
+	
+	@Override
+	boolean equals(Object message);
 }
