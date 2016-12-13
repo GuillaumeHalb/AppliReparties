@@ -20,6 +20,7 @@ import com.ensimag.server.impl.GetAccount;
 import com.ensimag.server.impl.Message;
 import com.ensimag.server.impl.RemoveAmount;
 import com.ensimag.server.impl.Result;
+import com.ensimag.server.impl.User;
 import com.ensimag.services.bank.IAccount;
 import com.ensimag.services.bank.IBankAction;
 import com.ensimag.services.bank.IBankMessage;
@@ -76,6 +77,15 @@ public class Main {
 		return bankNode;
 	}
 
+	private static IBankMessage createMessage(IBankNode bankNode, IBankAction action, long originalSender)
+			throws RemoteException {
+		IBankMessage message = null;
+		if (bankNode != null)
+			return new Message(action, messageId, originalSender, bankNode.getId(), EnumMessageType.SINGLE_DEST, null);
+		else
+			return new Message(action, messageId, originalSender, 0, EnumMessageType.BROADCAST, null);
+	}
+
 	public static void main(String[] args) throws RemoteException, NotBoundException, MalformedURLException {
 		ArrayList<IBankNode> bankNodeList = new ArrayList<IBankNode>();
 		IBankNode GoldmanSachs = (IBankNode) Naming.lookup("rmi://localhost/Goldman_Sachs");
@@ -122,10 +132,23 @@ public class Main {
 		 * 
 		 * client = (User) Naming.lookup("rmi://localhost/" + nameFirstName); }
 		 */
-
-		IUser client = (IUser) Naming.lookup("rmi://localhost/client");
-		boolean exit = false;
 		Scanner scanner = new Scanner(System.in);
+		String firstName, lastName, age;
+		System.out.println("Saisissez votre Prénom : ");
+		firstName = scanner.nextLine();
+		System.out.println("Saisissez votre Nom de famille : ");
+		lastName = scanner.nextLine();
+		System.out.println("Saisissez votre age");
+		age = scanner.nextLine();
+		while (!Main.tryParseInt(age)) {
+			System.out.println("Valeur entière attendu");
+			age = scanner.nextLine();
+		}
+
+		//IUser client = new User(lastName, firstName, Integer.parseInt(age));
+		 IUser client = (IUser) Naming.lookup("rmi://localhost/client");
+		boolean exit = false;
+
 		while (!exit) {
 
 			System.out.println("Quelle action effectuer ?");
@@ -169,79 +192,60 @@ public class Main {
 				 */
 				bankNode = getBankName(bankNodeList);
 				IBankAction action = new AddAccount(client);
-				IBankMessage message = null;
-				if (bankNode != null) {
-					message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-							EnumMessageType.SINGLE_DEST, null);
-				} else {
-					message = new Message(action, messageId, GoldmanSachs.getId(), 0,
-							EnumMessageType.BROADCAST, null);
-				}
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 				try {
 					GoldmanSachs.onMessage(message);
 					List<IResult<? extends Serializable>> resultList = GoldmanSachs
 							.getResultForMessage(message.getMessageId());
+					System.out.println("Resultat(s): ");
 					for (IResult result : resultList) {
-						System.out.println("Resultat: ");
-						System.out.println("Compte numero " + ((AccountBankNode) (result.getData())).getAccount().getAccountNumber()
-								+ " ouvert à la banque " + ((AccountBankNode) (result.getData())).getNode().getBankName() + " pour l'utilisateur "
-								+ ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getFirstName() + " "
-								+ ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getName() + ", "
-								+ ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getAge() + " ans");
-						System.out.println("Solde de " + ((AccountBankNode) (result.getData())).getAccount().getTotal());
+						System.out.println("Compte numero "
+								+ ((AccountBankNode) (result.getData())).getAccount().getAccountNumber()
+								+ " ouvert à la banque "
+								+ ((AccountBankNode) (result.getData())).getNode().getBankName()
+								+ " pour l'utilisateur "
+								+ ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getFirstName()
+								+ " " + ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getName()
+								+ ", " + ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getAge()
+								+ " ans");
+						System.out
+								.println("Solde de " + ((AccountBankNode) (result.getData())).getAccount().getTotal());
 					}
 
-					messageId++;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				messageId++;
+
 			} else if (actionString.equals("2")) {
 				System.out.println("Quel numéro de compte ?");
 				String accountNumber = scanner.nextLine();
 				while (!Main.tryParseInt(accountNumber)) {
 					System.out.println("Saisissez un entier");
 				}
-
-				System.out.println("Quelle banque ?");
-				Main.afficherListeBanques(bankNodeList);
-
-				boolean bankExists = false;
-				IBankNode bankNode = null;
-				while (!bankExists) {
-					try {
-						String bankName = scanner.nextLine();
-						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
-						bankExists = true;
-					} catch (Exception e) {
-						System.out.println("La banque spécifiée n'est pas dans la liste");
-						System.out.println("Resaisir un nom de banque : ");
-					}
-				}
+				IBankNode bankNode = getBankName(bankNodeList);
 				IBankAction action = new CloseAccount(Long.parseLong(accountNumber));
-				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-						EnumMessageType.SINGLE_DEST, null);
-				Result resultFromRequest = new Result(client, message.getMessageId());
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 				try {
 					GoldmanSachs.onMessage(message);
-					List<IResult<? extends Serializable>> resultList = GoldmanSachs
-							.getResultForMessage(message.getMessageId());
-					for (IResult result : resultList) {
+				} catch (Exception e) {
+
+					System.out.println(e.getMessage());
+				}
+				List<IResult<? extends Serializable>> resultList = GoldmanSachs
+						.getResultForMessage(message.getMessageId());
+				for (IResult result : resultList) {
+					try {
 						if (((boolean) result.getData())) {
 							System.out.println("Fermeture du compte numero " + accountNumber + " effectuée");
 						} else {
 							System.out.println("Action non effectuée");
 						}
+					} catch (Exception e) {
+
 					}
-					messageId++;
-				} catch (Exception e) {
-					if (e instanceof NotEnoughMoneyException) {
-						System.out.println(e.toString());
-					} else if (e instanceof AccountNotFoundException) {
-						System.out.println(e.toString()); // "Account not found
-															// " + accountNumber
-					}
-					System.out.println(e.getMessage());
 				}
+				messageId++;
 
 			} else if (actionString.equals("3")) {
 				System.out.println("Quel numéro de compte ?");
@@ -250,46 +254,34 @@ public class Main {
 					System.out.println("Saisissez un entier");
 					accountNumber = scanner.nextLine();
 				}
-
-				System.out.println("Quelle banque ?");
-				Main.afficherListeBanques(bankNodeList);
-
-				boolean bankExists = false;
-				IBankNode bankNode = null;
-				String bankName = null;
-				while (!bankExists) {
-					try {
-						bankName = scanner.nextLine();
-						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
-						bankExists = true;
-					} catch (Exception e) {
-						System.out.println("La banque spécifiée n'est pas dans la liste");
-						System.out.println("Resaisir un nom de banque : ");
-					}
-				}
+				IBankNode bankNode = getBankName(bankNodeList);
 				IBankAction action = new GetAccount(Long.parseLong(accountNumber));
-				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-						EnumMessageType.SINGLE_DEST, null);
-				Result resultFromRequest = new Result(client, message.getMessageId());
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 				try {
 					GoldmanSachs.onMessage(message);
-					List<IResult<? extends Serializable>> resultList = GoldmanSachs
-							.getResultForMessage(message.getMessageId());
-
-					for (IResult result : resultList) {
-						System.out.println("Resultat: ");
-						System.out.println("Compte numero " + ((IAccount) result.getData()).getAccountNumber()
-								+ " trouvé \n Utilisateur : "
-								+ ((IAccount) result.getData()).getAccountUser().getFirstName() + " "
-								+ ((IAccount) result.getData()).getAccountUser().getName() + ", "
-								+ ((IAccount) result.getData()).getAccountUser().getAge() + " ans");
-						System.out.println("Solde de " + ((IAccount) result.getData()).getTotal());
-					}
-
-					messageId++;
-				} catch (Exception e) {
-					System.out.println("action non effectuée");
+				} catch (Exception e1) {
+					System.out.println("Action non effectuée");
 				}
+				List<IResult<? extends Serializable>> resultList = GoldmanSachs
+						.getResultForMessage(message.getMessageId());
+				System.out.println("Resultat: ");
+				for (IResult result : resultList) {
+					try {
+						System.out.println("Compte numero "
+								+ ((AccountBankNode) (result.getData())).getAccount().getAccountNumber()
+								+ " dans la banque " + ((AccountBankNode) (result.getData())).getNode().getBankName()
+								+ " trouvé \n Utilisateur : "
+								+ ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getFirstName()
+								+ " " + ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getName()
+								+ ", " + ((AccountBankNode) (result.getData())).getAccount().getAccountUser().getAge()
+								+ " ans");
+						System.out
+								.println("Solde de " + ((AccountBankNode) (result.getData())).getAccount().getTotal());
+					} catch (Exception e) {
+
+					}
+				}
+				messageId++;
 
 			} else if (actionString.equals("4")) {
 				System.out.println("Quel numéro de compte ?");
@@ -297,22 +289,8 @@ public class Main {
 				while (!Main.tryParseInt(accountNumber)) {
 					System.out.println("Saisissez un entier");
 				}
+				IBankNode bankNode = getBankName(bankNodeList);
 
-				System.out.println("Quelle banque ?");
-				Main.afficherListeBanques(bankNodeList);
-
-				boolean bankExists = false;
-				IBankNode bankNode = null;
-				while (!bankExists) {
-					try {
-						String bankName = scanner.nextLine();
-						bankNode = (IBankNode) Naming.lookup("rmi://localhost/" + bankName);
-						bankExists = true;
-					} catch (Exception e) {
-						System.out.println("La banque spécifiée n'est pas dans la liste");
-						System.out.println("Resaisir un nom de banque : ");
-					}
-				}
 				System.out.println("Combien d'argent voulez vous ajouter");
 				String amountToAdd = scanner.nextLine();
 				while (!Main.tryParseInt(amountToAdd) || Integer.parseInt(amountToAdd) < 0) {
@@ -320,23 +298,24 @@ public class Main {
 					amountToAdd = scanner.nextLine();
 				}
 				IBankAction action = new AddAmount(Long.parseLong(accountNumber), Integer.parseInt(amountToAdd));
-				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-						EnumMessageType.SINGLE_DEST, null);
-				Result resultFromRequest = new Result(client, message.getMessageId());
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 				try {
 					GoldmanSachs.onMessage(message);
-					List<IResult<? extends Serializable>> resultList = GoldmanSachs
-							.getResultForMessage(message.getMessageId());
-
-					for (IResult result : resultList) {
-						System.out.println("Resultat: ");
+				} catch (Exception e) {
+					System.out.println("action non effectuée");
+				}
+				List<IResult<? extends Serializable>> resultList = GoldmanSachs
+						.getResultForMessage(message.getMessageId());
+				System.out.println("Resultat: ");
+				for (IResult result : resultList) {
+					try {
 						System.out.println("Le solde du compte " + Long.parseLong(accountNumber) + " est maintenant de "
 								+ (int) result.getData());
+					} catch (Exception e) {
 					}
-					messageId++;
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
 				}
+				messageId++;
+
 			} else if (actionString.equals("5")) {
 				System.out.println("Quel numéro de compte ?");
 				String accountNumber = scanner.nextLine();
@@ -352,22 +331,25 @@ public class Main {
 					amountToRemove = scanner.nextLine();
 				}
 				IBankAction action = new RemoveAmount(Long.parseLong(accountNumber), Integer.parseInt(amountToRemove));
-				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-						EnumMessageType.SINGLE_DEST, null);
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 
 				try {
 					GoldmanSachs.onMessage(message);
-					List<IResult<? extends Serializable>> resultList = GoldmanSachs
-							.getResultForMessage(message.getMessageId());
-					for (IResult result : resultList) {
-						System.out.println("Le nouveau solde du compte  " + accountNumber + ": "
-								+ (int) (result.getData()) + " effectuée");
-
-					}
-					messageId++;
 				} catch (Exception e) {
 					System.out.println("Action non effectuée");
 				}
+				List<IResult<? extends Serializable>> resultList = GoldmanSachs
+						.getResultForMessage(message.getMessageId());
+				for (IResult result : resultList) {
+					try {
+						System.out.println("Le nouveau solde du compte  " + accountNumber + ": "
+								+ (int) (result.getData()) + " effectuée");
+					} catch (Exception e) {
+
+					}
+				}
+				messageId++;
+
 			} else if (actionString.equals("6")) {
 				System.out.println("Quel numéro de compte ?");
 				String accountNumber = scanner.nextLine();
@@ -384,29 +366,33 @@ public class Main {
 				}
 				IBankAction action = new AuthorizeOverdraw(Long.parseLong(accountNumber),
 						Integer.parseInt(amountForOverdraw));
-				IBankMessage message = new Message(action, messageId, GoldmanSachs.getId(), bankNode.getId(),
-						EnumMessageType.SINGLE_DEST, null);
+				IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
 
-				Result resultFromRequest = new Result(client, message.getMessageId());
 				try {
 					GoldmanSachs.onMessage(message);
-					List<IResult<? extends Serializable>> resultList = GoldmanSachs
-							.getResultForMessage(message.getMessageId());
-					for (IResult result : resultList) {
+				} catch (Exception e) {
+					System.out.println("Action non effectuée");
+				}
+				List<IResult<? extends Serializable>> resultList = GoldmanSachs
+						.getResultForMessage(message.getMessageId());
+				for (IResult result : resultList) {
+					try {
 						System.out.println("Le découvert du compte  " + accountNumber + " est maintenant de "
 								+ (int) (result.getData()) + " ,effectuée");
 
+					} catch (Exception e) {
+
 					}
-					messageId++;
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
 				}
+				messageId++;
+
 			} else if (actionString.equals("7")) {
 				System.out.println("Sortie du programme...");
 				exit = true;
 			} else {
-
+				
 			}
 		}
+		System.out.println("sortie");
 	}
 }

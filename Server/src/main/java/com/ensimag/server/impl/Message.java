@@ -84,7 +84,7 @@ public class Message implements IBankMessage {
 	@Override
 	public boolean equals(Object message) {
 		Message message2 = (Message) message;
-		if (this.getMessageId() == message2.getMessageId() && this.getMessageType().equals(message2.getMessageType()) && this.getOriginalBankSenderId()==message2.getOriginalBankSenderId()) {
+		if (this.getMessageId() == message2.getMessageId() && this.getMessageType().equals(message2.getMessageType()) && this.getOriginalBankSenderId() == message2.getOriginalBankSenderId()) {
 			return true;
 		}
 		return false;

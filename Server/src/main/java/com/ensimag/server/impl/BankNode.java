@@ -141,7 +141,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	private void sendAckForMessage(IBankMessage message) {
 		System.out.println("\t send ack for message " + message.toString());
 		try {
-			Ack ack = new Ack(this.getId(), message.getMessageId(), message.getMessageType());
+			Ack ack = new Ack(this.getId(), message.getMessageId(), message.getMessageType(), message.getOriginalBankSenderId());
 			getSender(message).onAck(ack);
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -149,7 +149,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	}
 
 	private void followMessage(IBankMessage message) throws Exception {
-		CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(), message.getMessageType());
+		CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(), message.getMessageType(), message.getOriginalBankSenderId());
 		List<Long> listWaitedAck = this.waitS.get(couple);
 		if (listWaitedAck == null) {
 			listWaitedAck = new LinkedList<Long>();
@@ -170,9 +170,6 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}
 		this.waitS.put(couple, listWaitedAck);
 		for (IBankNode neighboor : this.neighboors) {
-			if (message.getMessageType().equals(EnumMessageType.BROADCAST)) {
-				System.out.println("resultats : " + this.waitingResults.toString());
-			}
 			try {
 				if (message.getSenderId() != neighboor.getId()) {
 					IBankMessage messageCloned = message.clone();
@@ -189,10 +186,15 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 
 	// Send result only to the message sender
 	private void sendResult(IBankMessage message, IResult<Serializable> result) throws Exception {
+		if (result == null) {
+			System.out.println("sendResult null");
+			return;
+		}
 		IBankMessage resultMessage = new Message(null, message.getMessageId(), this.id,
 				message.getOriginalBankSenderId(), EnumMessageType.DELIVERY, result);
-
-		CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(), message.getMessageType());
+		this.deja_vu.add(resultMessage);
+		
+		CoupleMessageIDType couple = new CoupleMessageIDType(resultMessage.getMessageId(), resultMessage.getMessageType(), resultMessage.getOriginalBankSenderId());
 		if (this.up.get(couple) != null) {
 			this.up.remove(couple);
 		}
@@ -202,7 +204,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 			listWaitedAck = new LinkedList<Long>();
 		}
 		listWaitedAck.add(message.getSenderId());
-		this.waitS.put(new CoupleMessageIDType(resultMessage.getMessageId(), EnumMessageType.DELIVERY), listWaitedAck);
+		this.waitS.put(couple, listWaitedAck);
 		try {
 			System.out.println("\t Envoie la reponse à " + this.getSender(message).getId());
 			this.getSender(message).onMessage(resultMessage);
@@ -214,7 +216,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 	private void stockResult(IBankMessage message) {
 		System.out.println("\t Recupere le resultat du message");
 		LinkedList<IResult<? extends Serializable>> resultList = this.waitingResults.get(message.getMessageId());
-		CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(), message.getMessageType());
+		CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(), message.getMessageType(), message.getOriginalBankSenderId());
 
 		if (this.up.get(couple) != null) {
 			this.up.remove(couple);
@@ -282,7 +284,7 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 				System.out.println("\t noeud non puit");
 				if (message.getOriginalBankSenderId() != this.id) {
 					CoupleMessageIDType couple = new CoupleMessageIDType(message.getMessageId(),
-							message.getMessageType());
+							message.getMessageType(), message.getOriginalBankSenderId());
 					this.up.put(couple, message.getSenderId());
 				}
 				// Le message est pour tout le monde
@@ -355,34 +357,37 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		}
 		return false;
 	}
-
+	
 	@Override
 	public void onAck(IAck ack) throws RemoteException {
-		System.out.println("\t reçoit le ack : " + ack.toString());
-
-		CoupleMessageIDType couple = new CoupleMessageIDType(ack.getAckMessageId(), ack.getType());
+		System.out.println("Reception ack " + ack.toString());
+		CoupleMessageIDType couple = new CoupleMessageIDType(ack.getAckMessageId(), ((Ack) ack).getType(), ((Ack) ack).getOriginalSenderId());
 		List<Long> listAckWaited = this.waitS.get(couple);
+		
 		for (int i = 0; i < listAckWaited.size(); i++) {
 			if (listAckWaited.get(i) == ack.getAckSenderId()) {
 				listAckWaited.remove(i);
 			}
 		}
 		this.waitS.put(couple, listAckWaited);
-
+//		System.out.println("on ack waitS: " + this.waitS.toString());
 		if (listAckWaited.size() == 0) {
 			// Si on n'est pas à l'envoyeur initial
 			System.out.println("\t on a recu tous les acks en attente");
+//			System.out.println("on ack up " + this.up.toString());
+//			System.out.println("couple " + couple.toString());
+//			System.out.println("this.up.get(couple) " + this.up.get(couple));
 			if (this.up.get(couple) != null) {
 				for (IBankNode neighboor : this.neighboors) {
 					if (neighboor.getId() == this.up.get(couple)) { // TODO: pas
 																	// sur ici
-						IAck ackSuivant = new Ack(this.getId(), ack.getAckMessageId(), ack.getType());
+						IAck ackSuivant = new Ack(this.getId(), ack.getAckMessageId(), ((Ack) ack).getType(), ((Ack) ack).getOriginalSenderId());
 						System.out.println("\t fait suivre le ack à " + neighboor.getId());
 						neighboor.onAck(ackSuivant);
 					}
 				}
 			} else {
-				System.out.println("\t Ack back to primary sender : OK");
+				System.out.println("\t ******** Ack back to primary sender : OK ***********");
 			}
 		}
 	}
@@ -399,7 +404,6 @@ public class BankNode extends UnicastRemoteObject implements IBankNode {
 		if (this.id < 0) {
 			throw new RemoteException();
 		}
-		System.out.println("get res: " + this.waitingResults.get(messageId).toString());
 		return this.waitingResults.get(messageId);
 	}
 

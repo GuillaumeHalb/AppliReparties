@@ -20,7 +20,7 @@ public class GetAccount implements IBankAction {
 
 	@Override
 	public Serializable execute(IBankNode node) throws Exception {
-		return node.getAccount(accountNumber);
+		return new AccountBankNode(node.getAccount(accountNumber), node);
 	}
 
 }

@@ -12,7 +12,5 @@ public interface IAck extends Serializable {
 	/**
 	 * @return the message id corresponding to this ack
 	 */
-	long getAckMessageId();
-	
-	EnumMessageType getType();
+	long getAckMessageId();	
 }
