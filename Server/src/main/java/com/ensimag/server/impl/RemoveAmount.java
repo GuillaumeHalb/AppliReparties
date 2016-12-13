@@ -23,7 +23,7 @@ public class RemoveAmount implements IBankAction {
 	@Override
 	public Serializable execute(IBankNode node) throws Exception {
 		IAccount account = node.getAccount(accountNumber);
-		return account.add(amount);
+		return account.remove(amount);
 	}
 
 }

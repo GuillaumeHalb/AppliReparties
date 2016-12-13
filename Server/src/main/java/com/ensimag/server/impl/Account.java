@@ -38,7 +38,7 @@ public class Account extends UnicastRemoteObject implements IAccount {
 	public int add(int amount) {
 		assert(amount >= 0);
 		this.balance += amount;
-		return balance;
+		return this.getTotal();
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class Account extends UnicastRemoteObject implements IAccount {
 		assert(amount >= 0);
 		if (this.balance + this.overdraw >= amount)	{
 			this.balance -= amount;
-			return 0;
+			return this.getTotal();
 		} else {
 			throw new NotEnoughMoneyException(this);
 		}
