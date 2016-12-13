@@ -19,9 +19,9 @@ public class AddAccount implements IBankAction {
 	}
 
 	@Override
-	public IAccount execute(IBankNode node) throws Exception {
+	public AccountBankNode execute(IBankNode node) throws Exception {
 
-		return node.openAccount(user);
+		return new AccountBankNode(node.openAccount(user),node);
 	}
 
 }

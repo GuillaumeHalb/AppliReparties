@@ -50,7 +50,7 @@ public class Bank implements IBank {
 		try {
 			return this.accountList.get(number);
 		} catch (Exception e) {
-			throw new AccountNotFoundException();
+			throw new AccountNotFoundException("Compte non trouvé");
 		}
 	}
 
