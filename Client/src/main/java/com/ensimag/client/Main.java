@@ -185,6 +185,7 @@ public class Main {
 				} else {
 					System.out.println("Action non effectuée");
 				}
+				compteur++;
 			} catch (Exception e) {
 
 			}
@@ -265,7 +266,6 @@ public class Main {
 	}
 
 	private static void removeAmount(ArrayList<IBankNode> bankNodeList, IBankNode GoldmanSachs) throws RemoteException {
-		System.out.println("Quel numéro de compte ?");
 		String accountNumber = getAccountNumber();
 		while (!Main.tryParseInt(accountNumber)) {
 			System.out.println("Saisissez un entier");
@@ -294,6 +294,7 @@ public class Main {
 			try {
 				System.out.println("Le nouveau solde du compte  " + accountNumber + ": " + (int) (result.getData())
 						+ " effectuée");
+				compteur++;
 			} catch (Exception e) {
 
 			}
