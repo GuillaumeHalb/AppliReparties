@@ -46,7 +46,7 @@ public class Account extends UnicastRemoteObject implements IAccount {
 		assert(amount >= 0);
 		if (this.balance + this.overdraw >= amount)	{
 			this.balance -= amount;
-			return this.getTotal();
+			return this.balance;
 		} else {
 			throw new NotEnoughMoneyException(this, "Pas assez d'argent (maximum : " + this.getTotal() + ", demandé : " + amount + ")");
 		}
@@ -60,7 +60,9 @@ public class Account extends UnicastRemoteObject implements IAccount {
 	@Override
 	public int setAllowedOverdraw(int overdraw) {
 		assert(overdraw >= 0);
-		
+		if ( balance + overdraw < 0 ){
+			System.out.println("Vous ne pouvez pas diminuer le découvert");		
+		}
 		this.overdraw = overdraw;
 		return this.overdraw;
 	}
