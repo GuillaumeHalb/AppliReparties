@@ -269,7 +269,9 @@ public class Main {
 		String amountToRemove = scanner.nextLine();
 		while (!Main.tryParseInt(amountToRemove) || Integer.parseInt(amountToRemove) < 0) {
 			System.out.println("Saisissez un entier");
-			amountToRemove = scanner.nextLine();
+			if (scanner.hasNext()) {
+				amountToRemove = scanner.nextLine();
+			}
 		}
 		IBankAction action = new RemoveAmount(Long.parseLong(accountNumber), Integer.parseInt(amountToRemove));
 		IBankMessage message = createMessage(bankNode, action, GoldmanSachs.getId());
@@ -290,7 +292,7 @@ public class Main {
 			} catch (Exception e) {
 
 			}
-		} 
+		}
 		if (compteur == 0) {
 			System.out.println("Pas de résultat pour cette action");
 		}
