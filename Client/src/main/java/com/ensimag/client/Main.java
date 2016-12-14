@@ -191,7 +191,7 @@ public class Main {
 			}
 		}
 		if (compteur == 0) {
-			System.out.println("Pas de résultat pour cette action");
+			System.out.println("Action non effectuée");
 		}
 		messageId++;
 	}
@@ -226,7 +226,7 @@ public class Main {
 			}
 		}
 		if (compteur == 0) {
-			System.out.println("Pas de résultat pour cette action");
+			System.out.println("Action non effectuée");
 		}
 		messageId++;
 	}
@@ -260,7 +260,7 @@ public class Main {
 			}
 		}
 		if (compteur == 0) {
-			System.out.println("Pas de résultat pour cette action");
+			System.out.println("Action non effectuée");
 		}
 		messageId++;
 	}
@@ -302,7 +302,7 @@ public class Main {
 			}
 		}
 		if (compteur == 0) {
-			System.out.println("Pas de résultat pour cette action");
+			System.out.println("Action non effectuée");
 		}
 		messageId++;
 	}
@@ -333,13 +333,14 @@ public class Main {
 			try {
 				System.out.println("Le découvert du compte  " + accountNumber + " est maintenant de "
 						+ (int) (result.getData()) + " ,effectuée");
-
+				compteur ++;
 			} catch (Exception e) {
 
 			}
+
 		}
 		if (compteur == 0) {
-			System.out.println("Pas de résultat pour cette action");
+			System.out.println("Action non effectuée");
 		}
 		messageId++;
 	}

@@ -49,5 +49,5 @@ public interface IAccount extends Serializable, Remote {
 	 *            the overdraw to set
 	 * @return the set overdraw
 	 */
-	int setAllowedOverdraw(int overdraw) throws RemoteException;
+	int setAllowedOverdraw(int overdraw) throws RemoteException, NotEnoughMoneyException;
 }
