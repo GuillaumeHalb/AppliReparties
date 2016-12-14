@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -15,6 +17,8 @@ import com.ensimag.server.impl.AccountBankNode;
 import com.ensimag.server.impl.AddAccount;
 import com.ensimag.server.impl.AddAmount;
 import com.ensimag.server.impl.AuthorizeOverdraw;
+import com.ensimag.server.impl.Bank;
+import com.ensimag.server.impl.BankNode;
 import com.ensimag.server.impl.CloseAccount;
 import com.ensimag.server.impl.GetAccount;
 import com.ensimag.server.impl.Message;
@@ -56,7 +60,7 @@ public class Main {
 		}
 	}
 
-	private static IUser createUser() throws NumberFormatException, RemoteException {
+	private static String createUser() throws NumberFormatException, RemoteException {
 		scanner = new Scanner(System.in);
 		String firstName, lastName, age;
 		System.out.println("Saisissez votre Prénom : ");
@@ -69,7 +73,11 @@ public class Main {
 			System.out.println("Valeur entière attendu");
 			age = scanner.nextLine();
 		}
-		return new User(lastName, firstName, Integer.parseInt(age));
+		Registry registry = LocateRegistry.getRegistry(1099);
+		User user = new User(lastName, firstName, Integer.parseInt(age));
+		registry.rebind(firstName, user);
+		System.out.println("client " + user.getFirstName() + " " + user.getName() + " " + user.getAge() + " ans enregistré");
+		return firstName;
 	}
 
 	private static String chooseAction() {
@@ -365,34 +373,37 @@ public class Main {
 		IBankNode DeutscheBank = (IBankNode) Naming.lookup("rmi://localhost/Deutsche_Bank");
 		bankNodeList.add(DeutscheBank);
 
-		// IUser client = new User(lastName, firstName, Integer.parseInt(age));
-		IUser client = (IUser) Naming.lookup("rmi://localhost/client");
+		IUser client2 = (IUser) Naming.lookup("rmi://localhost/client");
 		boolean exit = false;
-		// client = createUser();
+		String clientName = createUser();
+		IUser client = (IUser) Naming.lookup("rmi://localhost/" + clientName);
 
+		IBankNode currentNode = GoldmanSachs;
+		
 		while (!exit) {
-
+			
 			String actionString = chooseAction();
 
 			if (actionString.equals("1")) {
-				addAccount(bankNodeList, client, GoldmanSachs);
+				addAccount(bankNodeList, client, currentNode);
 			} else if (actionString.equals("2")) {
-				closeAccount(bankNodeList, GoldmanSachs);
+				closeAccount(bankNodeList, currentNode);
 			} else if (actionString.equals("3")) {
-				seeAccount(bankNodeList, GoldmanSachs);
+				seeAccount(bankNodeList, currentNode);
 			} else if (actionString.equals("4")) {
-				addAmount(bankNodeList, GoldmanSachs);
+				addAmount(bankNodeList, currentNode);
 			} else if (actionString.equals("5")) {
-				removeAmount(bankNodeList, GoldmanSachs);
+				removeAmount(bankNodeList, currentNode);
 			} else if (actionString.equals("6")) {
-				authorizeOverdraw(bankNodeList, GoldmanSachs);
+				authorizeOverdraw(bankNodeList, currentNode);
 			} else if (actionString.equals("7")) {
 				System.out.println("Sortie du programme...");
 				exit = true;
-			} else {
-
-			}
+				
+			} 
 		}
 		System.out.println("sortie");
+		return;
 	}
+	
 }
